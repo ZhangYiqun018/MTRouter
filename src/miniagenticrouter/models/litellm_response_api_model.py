@@ -57,7 +57,7 @@ class LitellmResponseAPIModel(LitellmModel):
             self._previous_response_id = getattr(resp, "id", None)
             return resp
         except litellm.exceptions.AuthenticationError as e:
-            e.message += " You can permanently set your API key with `mini-extra config set KEY VALUE`."
+            e.message += " You can permanently set your API key with `mtr-extra config set KEY VALUE`."
             raise e
 
     def query(self, messages: list[dict[str, str]], **kwargs) -> dict:
