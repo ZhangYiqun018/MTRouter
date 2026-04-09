@@ -5,7 +5,7 @@ This module provides tools for:
 - Trajectory collection and parsing
 - Learned router implementation
 
-Install with: pip install mini-agentic-router[research]
+Install with: pip install mtrouter[research]
 """
 
 from miniagenticrouter.research.data.split import DataSplit
