@@ -1,0 +1,157 @@
+# Training configuration for learned routers
+
+# === Model Pool Configuration ===
+# The model pool defines which models are available for routing.
+# This is the single source of truth for model names used in training,
+# data collection, and inference.
+model_pool:
+  - "openai/gpt-5"
+  - "deepseek/deepseek-v3.2"
+  - "minimax/minimax-m2"
+  - "moonshotai/kimi-k2-0905"
+  - "google/gemini-2.5-flash-lite"
+  - "openai/gpt-oss-120b"
+
+# === History Encoder Configuration ===
+history_encoder:
+  # HuggingFace model name or local path for text encoding
+  model_name: "Alibaba-NLP/gte-Qwen2-1.5B-instruct"
+
+  # Whether to freeze pretrained encoder parameters
+  freeze_encoder: true
+
+  # Maximum total tokens for encoding (task + context combined)
+  # Truncation priority: task → min_recent_turns → remaining context
+  max_tokens: 8192
+
+  # Minimum number of recent turns to always keep
+  min_recent_turns: 1
+
+  # Whether to use projection layer after encoding
+  # If true, projects from encoder_dim*2 to encoder_dim
+  use_projection: true
+
+  # Pooling strategy for extracting embeddings
+  # - "cls": Use first token [CLS] (for encoder models like BERT)
+  # - "last_token": Use last token [EOS] (for decoder-only models like Qwen3-Embedding)
+  pooling_mode: "last_token"
+
+  # Embedding backend:
+  # - "hf": Use HuggingFace AutoModel locally
+  # - "vllm": Use a vLLM server via OpenAI-compatible HTTP API
+  backend: "vllm"
+
+  # vLLM server base URL (only used when backend="vllm")
+  vllm_base_url: "http://172.30.38.91:8000"
+
+  # vLLM request model ID (only used when backend="vllm").
+  # Must match an entry in GET {vllm_base_url}/v1/models (e.g. "Qwen3-Embedding-0.6B").
+  # If null/omitted, the client falls back to basename(model_name).
+  vllm_model_id: Qwen3-Embedding-0.6B
+
+# === Training Configuration ===
+training:
+  # Training hyperparameters
+  epochs: 100
+  batch_size: 64
+  learning_rate: 1.0e-3
+  lambda_: 1.0  # Cost penalty coefficient for Q = score - lambda * cost
+  cost_loss_weight: 0.0  # Weight for cost loss in dual-head training
+
+  # Optimizer
+  optimizer: "adamw"
+  weight_decay: 0.01
+  grad_clip: 1.0  # Gradient clipping max norm (0 to disable)
+
+  # Learning rate scheduler
+  scheduler: "cosine"  # none, cosine, plateau
+  min_lr: 1.0e-5
+
+  # Early stopping
+  early_stop: 3  # Patience (0 to disable)
+
+  # Validation
+  val_ratio: 0.1
+
+  # Checkpoints
+  save_every: 5  # Save checkpoint every N epochs (0 to disable)
+  max_checkpoints: 5  # Maximum number of periodic checkpoints to keep
+
+  # AWR (Advantage-Weighted Regression) for score gap amplification
+  # AWR reweights samples: high-advantage samples get higher weight
+  awr:
+    enabled: false  # Enable AWR weighted loss
+    tau: 1.0        # Temperature: smaller = sharper weights (0.1~10.0)
+    min_group_size: 2  # Min samples per (task_id, step_idx) group
+
+  # Margin Loss for enforcing score gaps between models
+  # Adds penalty when best model's pred doesn't lead by margin
+  margin:
+    enabled: false  # Enable margin loss
+    margin: 0.1     # Target gap between best and other models
+    weight: 0.1     # Loss weight for margin term
+
+# === Model Encoder Configuration ===
+model_encoder:
+  # Number of hidden units in each meta MLP layer
+  meta_hidden_dim: 32
+
+  # Residual embedding dimension per model
+  residual_dim: 16
+
+  # L2 regularization weight for residual embeddings
+  residual_reg_weight: 0.0001
+
+# === Q-Network Configuration ===
+q_network:
+  # Hidden layer dimensions
+  hidden_dims: [256, 256]
+
+  # Dropout probability
+  dropout: 0.1
+
+# === Precomputation Configuration ===
+# Precompute embeddings before training for faster training
+# Uses the same backend as online inference to ensure training/inference consistency
+precompute:
+  # Whether to precompute embeddings
+  # Can be overridden with --precompute flag
+  enabled: true
+
+  # Batch size for encoding (only used for HF backend)
+  batch_size: 8
+
+  # Backend for embedding computation (must match history_encoder.backend)
+  # - "hf": Use HuggingFace AutoModel locally
+  # - "vllm": Use vLLM server via HTTP API
+  backend: "vllm"
+
+  # vLLM server configuration (only used when backend="vllm")
+  vllm_base_url: "http://172.30.38.91:8000"
+  vllm_timeout: 60.0
+  vllm_max_retries: 5
+
+  # Parallel workers for vLLM requests (only used when backend="vllm")
+  # Each worker processes one sample: segment -> cache check -> encode
+  max_workers: 16
+
+  # SQLite cache path for embeddings (only used when backend="vllm")
+  # Set to null to disable caching
+  cache_path: "embeddings/cache.db"
+
+  # Note: model_name, max_tokens, min_recent_turns are inherited from history_encoder
+
+# === Alternative Models ===
+# Local:
+#   Alibaba-NLP/gte-Qwen2-1.5B-instruct
+#     - Parameters: ~600M
+#     - Hidden size: 1024 (auto-detected)
+#
+# HuggingFace:
+#   distilbert-base-uncased:
+#     - Parameters: 66M
+#     - Hidden size: 768
+#
+#   sentence-transformers/all-MiniLM-L6-v2:
+#     - Parameters: 22M
+#     - Hidden size: 384

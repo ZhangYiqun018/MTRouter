@@ -1,0 +1,154 @@
+# HLE (Humanity's Last Exam) benchmark configuration
+# For challenging multi-step questions requiring research and reasoning
+
+agent:
+  agent_class: "miniagenticrouter.agents.multitool.MultiToolAgent"
+  action_mode: "multitool"
+
+  # Tools for HLE - focus on research and computation
+  enabled_tools:
+    - search
+    - python
+    - browse
+    - answer
+
+  tool_configs:
+    search:
+      api_key_env: "SERPER_API_KEY"
+      max_results: 10
+      # cacheable: true  # Default: enabled (same query returns cached result)
+      # cache_key_fields: ["query", "num_results"]  # Fields used for cache key
+    python:
+      timeout: 120  # Longer timeout for complex computations
+      max_output_length: 50000
+      # cacheable: false  # Default: disabled (code execution has side effects)
+    browse:
+      max_content_length: 150000
+      timeout: 60  # Jina fetch timeout in seconds (default: 30)
+      use_jina: true
+      jina_api_key_env: "JINA_API_KEY"
+      # LLM summarization (aligned with DeepResearch tool_visit.py)
+      use_llm_summary: true
+      summary_model: "deepseek/deepseek-v3.2"
+      summary_model_kwargs:
+        temperature: 0.7
+      max_summary_tokens: 95000
+      # cacheable: true  # Default: enabled (same URL+goal returns cached content)
+      # cache_key_fields: ["url", "goal"]
+
+  max_parallel_calls: 3
+  answer_tool: "answer"
+  include_tool_schemas: true
+
+  # Global cache settings
+  cache_enabled: true  # Set to false to disable all tool caching
+  cache_db_path: "~/.miniagenticrouter/tool_cache.db"  # SQLite database path (null for in-memory)
+  cache_max_size: 1000000  # Maximum cached entries (LRU eviction)
+  cache_ttl_seconds: null  # Cache expiration in seconds (null = never expire)
+
+  system_template: |
+    You are an expert problem solver tackling challenging questions from Humanity's Last Exam.
+    These questions require deep reasoning, careful research, and precise answers.
+
+    ## Available Tools
+
+    <tools>
+    {% for tool in tool_schemas %}
+    {{ tool.to_xml() }}
+    {% endfor %}
+    </tools>
+
+    ## Tool Call Formats
+
+    You can use either XML or JSON format inside <tool_call> tags:
+
+    **Format A: XML**
+    <tool_call>
+    <tool_name>
+      <param1>value1</param1>
+      <param2>value2</param2>
+    </tool_name>
+    </tool_call>
+
+    **Format B: JSON**
+    <tool_call>{"name": "tool_name", "arguments": {"param1": "value1"}}</tool_call>
+
+    ## Examples
+
+    <tool_call>
+    <search>
+      <query>maximum likelihood estimation</query>
+    </search>
+    </tool_call>
+
+    <tool_call>{"name": "python", "arguments": {"code": "print(2 + 2)"}}</tool_call>
+
+    ## Strategy for HLE Questions
+
+    1. **Understand the question**: Read carefully and identify what's being asked
+    2. **Break down the problem**: Decompose into sub-problems if needed
+    3. **Research if needed**: Use `search` for factual information you're unsure about
+    4. **Verify sources**: Use `browse` to read primary sources when accuracy matters
+    5. **Compute when needed**: Use `python` for calculations, data analysis
+    6. **Synthesize**: Combine information from multiple sources
+    7. **Verify your answer**: Double-check before submitting
+    8. **Submit**: Use `answer` tool with your final answer
+
+    ## Important Notes
+
+    - These are challenging questions - take your time
+    - Be precise - exact answers are often required
+    - Show your reasoning before using tools
+    - If uncertain, express confidence level in your answer
+
+  instance_template: |
+    ## HLE Question
+    {% if subject %}
+    **Subject**: {{ subject }}
+    {% endif %}
+
+    {{ question | default(task) }}
+
+    ---
+
+    Solve this step by step. Use tools to research and verify.
+    Submit your final answer using the `answer` tool:
+    <tool_call>{"name": "answer", "arguments": {"answer": "your final answer"}}</tool_call>
+
+  tool_response_template: |
+    <tool_response name="{{ tool_name }}">
+    {{ output }}
+    </tool_response>
+
+  format_error_template: |
+    Please use the correct format (XML or JSON inside tool_call tags):
+    <tool_call><tool_name><param>value</param></tool_name></tool_call>
+    OR
+    <tool_call>{"name": "tool_name", "arguments": {...}}</tool_call>
+
+  parser_config:
+    parser_class: "toolcall"
+    allow_multiple_calls: true
+    allow_no_calls: false
+
+  step_limit: 30
+  cost_limit: 5.0
+
+  finish_markers:
+    - "FINAL_ANSWER"
+
+model:
+  model_name: "anthropic/claude-sonnet-4-5-20250929"
+  model_kwargs:
+    drop_params: true  # Drop unsupported params for different models
+    temperature: 0.0
+    max_tokens: 8192  # More tokens for complex reasoning
+
+# LLM-as-a-Judge configuration (aligned with official HLE evaluation)
+# Reference: https://github.com/centerforaisafety/hle
+judge:
+  enabled: true  # Enable automatic LLM evaluation after each run
+  model_name: "deepseek/deepseek-v3.2"  # Judge model (official uses o3-mini or gpt-4o)
+  model_kwargs:
+    temperature: 0.0
+    max_tokens: 32000

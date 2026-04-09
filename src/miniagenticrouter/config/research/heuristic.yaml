@@ -1,0 +1,37 @@
+# Heuristic Router Configuration
+# Rule-based model selection without training
+
+# Task-specific settings
+tasks:
+  hle:
+    max_steps: 30           # Maximum steps for HLE tasks
+    strong_model: "openai/gpt-5"
+    value_model:  "x-ai/grok-4.1-fast"
+    cheap_pool:
+      - "minimax/minimax-m2"
+      - "moonshotai/kimi-k2-0905"
+      - "deepseek/deepseek-v3.2"
+
+  scienceworld:
+    max_steps: 50           # Maximum steps for ScienceWorld tasks
+    strong_model: "openai/gpt-5"
+    value_model: "deepseek/deepseek-v3.2"
+    cheap_pool:
+      - "minimax/minimax-m2"
+      - "moonshotai/kimi-k2-0905"
+      - "x-ai/grok-4.1-fast"
+
+# Tool error detection rules
+tool_error_rules:
+  # Patterns in ToolResult.error field that indicate errors
+  error_patterns:
+    - "unknown_tool:"
+    - "validation_error:"
+    - "execution_error:"
+  # Also check returncode != 0
+  check_returncode: true
+
+# Phase threshold: when to switch to value_model
+# ceil(late_phase_fraction * max_steps) is the threshold
+# Default: 2/3 of max_steps
+late_phase_fraction: 0.667

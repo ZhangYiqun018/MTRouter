@@ -1,0 +1,322 @@
+# Custom Model Configuration
+#
+# Define custom models for cost tracking, connection settings, and model information.
+#
+# Usage:
+#   1. Add model definitions in this file (project-level)
+#   2. Or copy to ~/.config/mini-agentic-router/custom_models.yaml (user-level)
+#
+# Configuration Options:
+#   - display_name: Human-readable name for the model
+#   - provider: litellm provider identifier (openai, anthropic, etc.)
+#   - max_tokens: Maximum tokens the model can generate
+#   - max_input_tokens: Maximum input context length
+#   - max_output_tokens: Maximum output tokens
+#   - input_cost_per_million: Cost per 1M input tokens (USD)
+#   - output_cost_per_million: Cost per 1M output tokens (USD)
+#   - supports_vision: Whether the model supports image inputs
+#   - supports_function_calling: Whether the model supports function calling
+#
+# Connection Settings (optional - auto-detected from environment variables):
+#   - api_base: Override API endpoint (default: reads from OPENAI_API_BASE, etc.)
+#   - api_key_env: Override API key env var name (default: OPENAI_API_KEY, etc.)
+#   - model_kwargs: Additional kwargs passed to litellm
+#
+# Environment Variable Resolution (by provider):
+#   - openai:    OPENAI_API_BASE, OPENAI_BASE_URL, OPENAI_API_KEY
+#   - anthropic: ANTHROPIC_API_BASE, ANTHROPIC_BASE_URL, ANTHROPIC_API_KEY
+#   - azure:     AZURE_API_BASE, AZURE_OPENAI_ENDPOINT, AZURE_API_KEY
+#   - gemini:    GEMINI_API_BASE, GEMINI_API_KEY, GOOGLE_API_KEY
+
+models:
+  # Claude via OpenAI-compatible API
+  # The model name "openai/claude-sonnet-4-5-20250929" is sent as-is to the API
+  # because custom_llm_provider prevents litellm from parsing the prefix
+  qwen/qwen-2.5-7b-instruct:
+    display_name: "qwen 2.5 7b instruct (OpenAI Compatible)"
+    provider: openai
+    max_tokens: 32768
+    max_input_tokens: 32768
+    max_output_tokens: 32768
+    input_cost_per_million: 0.04
+    output_cost_per_million: 0.1
+    supports_vision: false
+    supports_function_calling: true
+    model_kwargs:
+      custom_llm_provider: openai  # Keeps full model name, prevents prefix stripping
+      extra_body:
+        provider: 
+          order:
+            - together/fp8
+
+  x-ai/grok-4.1-fast:
+    display_name: "Claude Sonnet 4.5 (OpenAI Compatible)"
+    provider: openai
+    max_tokens: 30000
+    max_input_tokens: 2000000
+    max_output_tokens: 30000
+    input_cost_per_million: 0.2
+    output_cost_per_million: 0.5
+    supports_vision: false
+    supports_function_calling: true
+    model_kwargs:
+      custom_llm_provider: openai  # Keeps full model name, prevents prefix stripping
+
+
+  z-ai/glm-4.7:
+    display_name: "Claude Sonnet 4.5 (OpenAI Compatible)"
+    provider: openai
+    max_tokens: 13000
+    max_input_tokens: 202752
+    max_output_tokens: 13000
+    input_cost_per_million: 0.6
+    output_cost_per_million: 2.2
+    supports_vision: false
+    supports_function_calling: true
+    model_kwargs:
+      custom_llm_provider: openai  # Keeps full model name, prevents prefix stripping
+      extra_body:
+        provider: 
+          order:
+            - z-ai
+
+  anthropic/claude-sonnet-4.5:
+    display_name: "Claude Sonnet 4.5 (OpenAI Compatible)"
+    provider: openai
+    max_tokens: 64000
+    max_input_tokens: 1000000
+    max_output_tokens: 64000
+    input_cost_per_million: 3
+    output_cost_per_million: 15.0
+    supports_vision: true
+    supports_function_calling: true
+    model_kwargs:
+      custom_llm_provider: openai  # Keeps full model name, prevents prefix stripping
+
+  anthropic/claude-opus-4.5:
+    display_name: "Claude sonnet 4.5 (OpenAI Compatible from OpenRouter)"
+    provider: openai
+    max_tokens: 200000
+    max_input_tokens: 15000
+    max_output_tokens: 32000
+    input_cost_per_million: 5
+    output_cost_per_million: 25
+    supports_vision: true
+    supports_function_calling: true
+    model_kwargs:
+      custom_llm_provider: openai  # Keeps full model name, prevents prefix stripping
+
+  # GPT-4o via OpenAI-compatible API
+  openai/gpt-4o:
+    display_name: "GPT-4o (OpenAI Compatible)"
+    provider: openai
+    max_tokens: 4096
+    max_input_tokens: 128000
+    max_output_tokens: 4096
+    input_cost_per_million: 2.5
+    output_cost_per_million: 10.0
+    supports_vision: true
+    supports_function_calling: true
+    model_kwargs:
+      custom_llm_provider: openai  # Keeps full model name, prevents prefix stripping
+
+  openai/gpt-4o-mini:
+    display_name: "GPT-4o-mini (OpenAI Compatible)"
+    provider: openai
+    max_tokens: 4096
+    max_input_tokens: 128000
+    max_output_tokens: 4096
+    input_cost_per_million: 2.5
+    output_cost_per_million: 10.0
+    supports_vision: true
+    supports_function_calling: true
+    model_kwargs:
+      custom_llm_provider: openai  # Keeps full model name, prevents prefix stripping
+
+  openai/gpt-5-mini:
+    display_name: "GPT-5-mini (OpenAI Compatible)"
+    provider: openai
+    max_tokens: 4096
+    max_input_tokens: 400000
+    max_output_tokens: 4096
+    input_cost_per_million: 0.25
+    output_cost_per_million: 2
+    supports_vision: true
+    supports_function_calling: true
+    model_kwargs:
+      custom_llm_provider: openai  # Keeps full model name, prevents prefix stripping
+
+  openai/gpt-5:
+    display_name: "GPT-5 (OpenAI Compatible)"
+    provider: openai
+    max_tokens: 128000
+    max_input_tokens: 400000
+    max_output_tokens: 128000
+    input_cost_per_million: 1.25
+    output_cost_per_million: 10.0
+    knowledge_cutoff: "2024-09-30"  # Official: Sep 30, 2024
+    supports_vision: true
+    supports_function_calling: true
+    model_kwargs:
+      custom_llm_provider: openai  # Keeps full model name, prevents prefix stripping
+
+  openai/gpt-5.1-codex:
+    display_name: "GPT-5.1-codex (OpenAI Compatible)"
+    provider: openai
+    max_tokens: 128000
+    max_input_tokens: 400000
+    max_output_tokens: 128000
+    input_cost_per_million: 1.25
+    output_cost_per_million: 10.0
+    knowledge_cutoff: "2024-09-30"  # Official: Sep 30, 2024
+    supports_vision: true
+    supports_function_calling: true
+    model_kwargs:
+      custom_llm_provider: openai  # Keeps full model name, prevents prefix stripping
+
+  minimax/minimax-m2:
+    display_name: "minimax m2 (OpenAI Compatible)"
+    provider: openai
+    max_tokens: 130000
+    max_input_tokens: 196608
+    max_output_tokens: 4096
+    input_cost_per_million: 0.2
+    output_cost_per_million: 1
+    knowledge_cutoff: "2025-06-01"  # Official: 2025-06 (month precision)
+    supports_vision: false
+    supports_function_calling: true
+    model_kwargs:
+      custom_llm_provider: openai  # Keeps full model name, prevents prefix stripping
+
+  google/gemini-3-flash-preview:
+    display_name: "gemini-3-flash-preview (OpenAI Compatible)"
+    provider: openai
+    max_tokens: 60000
+    max_input_tokens: 1048576
+    max_output_tokens: 60000
+    input_cost_per_million: 0.5
+    output_cost_per_million: 3
+    supports_vision: true
+    supports_function_calling: true
+    model_kwargs:
+      custom_llm_provider: openai
+      extra_body:
+        provider:
+          order:
+            - minimax/fp8
+
+  moonshotai/kimi-k2-0905:
+    display_name: "kimi k2 (OpenAI Compatible)"
+    provider: openai
+    max_tokens: 131000
+    max_input_tokens: 131000
+    max_output_tokens: 131000
+    input_cost_per_million: 0.39
+    output_cost_per_million: 1.9
+    supports_vision: false
+    supports_function_calling: true
+    model_kwargs:
+      custom_llm_provider: openai  # Keeps full model name, prevents prefix stripping
+      extra_body:
+        provider:
+          order:
+            - moonshotai
+            
+  deepseek/deepseek-v3.2:
+    display_name: "deepseek v3.2 (OpenAI Compatible from openrouter)"
+    provider: openai
+    max_tokens: 163840
+    max_input_tokens: 163840
+    max_output_tokens: 65000
+    input_cost_per_million: 0.27
+    output_cost_per_million: 0.42
+    knowledge_cutoff: "2025-09-01"  # Unofficial (third-party): Sep 2025
+    supports_vision: false
+    supports_function_calling: true
+    model_kwargs:
+      custom_llm_provider: openai  # Keeps full model name, prevents prefix stripping
+      extra_body:
+        provider:
+          order:
+            - siliconflow/fp8
+  
+  google/gemini-2.5-flash-lite:
+    display_name: "gemini 2.5 flash lite (OpenAI Compatible from openrouter)"
+    provider: openai
+    max_tokens: 65000
+    max_input_tokens: 1048576 
+    max_output_tokens: 65000
+    input_cost_per_million: 0.1
+    output_cost_per_million: 0.4
+    knowledge_cutoff: "2025-09-01"  # Unofficial (third-party): Sep 2025
+    supports_vision: false  
+    supports_function_calling: true
+    model_kwargs:
+      custom_llm_provider: openai  # Keeps full model name, prevents prefix stripping
+
+  openai/gpt-oss-120b:
+    display_name: "gemini 2.5 flash lite (OpenAI Compatible from openrouter)"
+    provider: openai
+    max_tokens: 131072
+    max_input_tokens: 131072
+    max_output_tokens: 131072
+    input_cost_per_million: 0.09
+    output_cost_per_million: 0.36
+    knowledge_cutoff: "2025-09-01"  # Unofficial (third-party): Sep 2025
+    supports_vision: false  
+    supports_function_calling: true
+    model_kwargs:
+      custom_llm_provider: openai  # Keeps full model name, prevents prefix stripping
+      extra_body:
+        provider:
+          order:
+            - google-vertex
+        usage:
+          include: true
+
+  alibaba/tongyi-deepresearch-30b-a3b:
+    display_name: "alibaba/tongyi-deepresearch-30b-a3b (OpenAI Compatible from openrouter)"
+    provider: openai
+    max_tokens: 131072
+    max_input_tokens: 131072
+    max_output_tokens: 131072
+    input_cost_per_million: 0.09
+    output_cost_per_million: 0.45
+    knowledge_cutoff: "2025-09-01"  # Unofficial (third-party): Sep 2025
+    supports_vision: false  
+    supports_function_calling: true
+    model_kwargs:
+      custom_llm_provider: openai  # Keeps full model name, prevents prefix stripping
+      extra_body:
+        provider:
+          order:
+            - atlas-cloud/fp8
+        usage:
+          include: true
+
+  openrouter/auto:
+    display_name: "auto router by OpenRouter (OpenAI Compatible from openrouter)"
+    provider: openai
+    max_tokens: 2000000
+    max_input_tokens: 2000000
+    max_output_tokens: 2000000
+    input_cost_per_million: 0.01
+    output_cost_per_million: 0.01
+    knowledge_cutoff: "2025-09-01"  # Unofficial (third-party): Sep 2025
+    supports_vision: false  
+    supports_function_calling: true
+    model_kwargs:
+      custom_llm_provider: openai  # Keeps full model name, prevents prefix stripping
+      extra_body:
+        usage:
+          include: true
+
+  # Example: Local model via Ollama
+  # ollama/llama3:
+  #   display_name: "Llama 3 (Local)"
+  #   provider: ollama
+  #   max_tokens: 4096
+  #   max_input_tokens: 8192
+  #   max_output_tokens: 4096
+  #   input_cost_per_million: 0
+  #   output_cost_per_million: 0

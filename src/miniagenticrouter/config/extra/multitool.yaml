@@ -1,0 +1,128 @@
+# Multi-tool agent configuration
+# Base configuration for agents with multiple tool support
+# Used for HLE, GAIA, and similar multi-turn + tool use benchmarks
+
+agent:
+  agent_class: "miniagenticrouter.agents.multitool.MultiToolAgent"
+  action_mode: "multitool"
+
+  # Enabled tools
+  enabled_tools:
+    - bash
+    - python
+    - search
+    - browse
+    - file_read
+    - answer
+
+  # Per-tool configuration
+  tool_configs:
+    search:
+      api_key_env: "SERPER_API_KEY"
+      max_results: 10
+    python:
+      timeout: 60
+      max_output_length: 50000
+    browse:
+      max_content_length: 50000
+      use_jina: false
+    file_read:
+      max_lines: 500
+      max_chars: 50000
+
+  # Execution settings
+  max_parallel_calls: 5
+  answer_tool: "answer"
+  include_tool_schemas: true
+
+  # Templates
+  system_template: |
+    You are a helpful AI assistant with access to multiple tools.
+    Think step by step to solve problems effectively.
+
+    ## Available Tools
+
+    {% for tool in tool_schemas %}
+    ### {{ tool.name }}
+    {{ tool.description }}
+
+    **Parameters:**
+    {% for param_name, param_info in tool.parameters.get('properties', {}).items() %}
+    - `{{ param_name }}` ({{ param_info.get('type', 'any') }}{% if param_name in tool.required %}, required{% endif %}): {{ param_info.get('description', '') }}
+    {% endfor %}
+
+    {% if tool.examples %}
+    **Examples:**
+    {% for ex in tool.examples %}
+    ```json
+    {{ ex | tojson }}
+    ```
+    {% endfor %}
+    {% endif %}
+
+    {% endfor %}
+
+    ## How to Use Tools
+
+    To use a tool, respond with a tool call in this format:
+
+    ```
+    <tool_call>{"name": "tool_name", "arguments": {...}}</tool_call>
+    ```
+
+    You can include your reasoning before the tool call.
+
+    ## Important Guidelines
+
+    1. **One tool per step**: Use ONE tool call per response, then wait for the result
+    2. **Use search** for current information you don't know
+    3. **Use python** for calculations, data processing, or code execution
+    4. **Use browse** to read specific web pages in detail
+    5. **Use file_read** to examine file contents
+    6. **Use answer** to submit your final answer when done
+
+    When you have determined the final answer, use the `answer` tool to submit it.
+
+  instance_template: |
+    ## Task
+
+    {{ task }}
+
+    Please solve this step by step using the available tools.
+    When you have the final answer, use the `answer` tool to submit it.
+
+  tool_response_template: |
+    <tool_response name="{{ tool_name }}">
+    {{ output }}
+    </tool_response>
+
+  action_observation_template: |
+    {{ output }}
+
+  format_error_template: |
+    Invalid tool call format. Please use:
+
+    <tool_call>{"name": "tool_name", "arguments": {...}}</tool_call>
+
+    Available tools: {{ tools | join(', ') }}
+
+  # Parser configuration
+  parser_config:
+    parser_class: "toolcall"
+    allow_multiple_calls: true
+    allow_no_calls: false
+
+  # Limits
+  step_limit: 50
+  cost_limit: 5.0
+
+  # Finish markers (in addition to answer tool)
+  finish_markers:
+    - "TASK_COMPLETE"
+    - "FINAL_ANSWER"
+
+model:
+  model_name: "anthropic/claude-sonnet-4-5-20250929"
+  model_kwargs:
+    temperature: 0.0
+    max_tokens: 4096

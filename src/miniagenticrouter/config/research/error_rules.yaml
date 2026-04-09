@@ -1,0 +1,319 @@
+# Error Detection Rules Configuration
+# Version: 2.0
+#
+# This file defines error patterns for detecting errors in trajectory observations.
+# Used by ErrorDetector to identify and categorize errors in agent interactions.
+#
+# Structure:
+#   - defaults: Global settings (severity weights, enabled flag, rule hierarchy)
+#   - hle: Rules for HLE (Humanity's Last Exam) benchmark
+#   - scienceworld: Rules for ScienceWorld benchmark
+#
+# Each rule contains:
+#   - patterns: List of string patterns to match (case-sensitive)
+#   - severity: Error severity level (high/medium/low)
+#   - description: Human-readable description (optional)
+#
+# Rule Hierarchy:
+#   - Parent rules are excluded when child rules match (avoid double counting)
+#   - Example: python_traceback is parent of python_name_error
+#
+# Extensibility:
+#   - Add custom_rules list for runtime additions
+#   - Add new benchmark sections as needed
+
+version: "2.0"
+
+# =============================================================================
+# Global Settings
+# =============================================================================
+
+defaults:
+  enabled: true
+  severity_weights:
+    high: 0.3
+    medium: 0.1
+    low: 0.05
+
+# =============================================================================
+# Rule Hierarchy (Parent-Child Relationships)
+# =============================================================================
+# When a child rule matches, the parent rule is excluded from results.
+# This avoids double-counting errors like Traceback + NameError.
+
+rule_hierarchy:
+  # Python traceback is parent of all specific Python errors
+  python_traceback:
+    - python_name_error
+    - python_syntax_error
+    - python_indentation_error
+    - python_type_error
+    - python_value_error
+    - python_index_error
+    - python_key_error
+    - python_attribute_error
+    - python_import_error
+    - python_zero_division
+
+  # browse_403 and browse_access_denied often co-occur
+  browse_403:
+    - browse_access_denied
+
+# =============================================================================
+# Annealed Error Cost (AEC) Configuration
+# =============================================================================
+# AEC applies time-dependent penalties: lighter early, heavier late.
+# Penalty formula: pen_t = max(base * m(severity) * w(progress), min_penalty)
+# where base = 1/N, progress = t/N, w() is the warmup function.
+
+aec:
+  enabled: true
+
+  # Expected steps (N) by task category
+  # Computed from successful trajectory median steps
+  expected_steps:
+    hle:
+      default: 8
+      "Biology/Medicine": 7
+      "Chemistry": 9
+      "Computer Science/AI": 5
+      "Engineering": 8
+      "Humanities/Social Science": 12
+      "Math": 8
+      "Other": 14
+      "Physics": 7
+    scienceworld:
+      default: 27
+      boil: 38
+      chemistry-mix: 22
+      find-animal: 42
+      find-plant: 17
+      grow-plant: 50
+      identify-life-stages-1: 50
+      identify-life-stages-2: 9
+      inclined-plane-determine-angle: 36
+      inclined-plane-friction-unnamed-surfaces: 29
+      lifespan-longest-lived: 13
+      lifespan-shortest-lived: 11
+      measure-melting-point-known-substance: 13
+      melt: 32
+      mendelian-genetics-known-plant: 8
+      power-component: 50
+      power-component-renewable-vs-nonrenewable-energy: 50
+      test-conductivity: 24
+      test-conductivity-of-unknown-substances: 49
+      use-thermometer: 26
+
+  # Severity -> penalty coefficient mapping
+  severity_coefficients:
+    high: 1.0
+    medium: 0.8
+    low: 0.2
+
+  # Warmup function parameters (piecewise linear)
+  # w(p) = w_min for p <= p0
+  # w(p) = w_min + (w_max - w_min) * (p - p0) / (p1 - p0) for p0 < p < p1
+  # w(p) = w_max for p >= p1
+  warmup:
+    p0: 0.3
+    p1: 0.7
+    w_min: 0.3
+    w_max: 1.0
+
+  # Minimum penalty factor (avoid zero penalty in early steps)
+  # pen_t >= min_penalty_factor * base
+  min_penalty_factor: 0.2
+
+# =============================================================================
+# HLE Benchmark Rules (24 rules)
+# =============================================================================
+
+hle:
+  # ----- Format Errors -----
+  format_error:
+    patterns:
+      - "please use the correct format"
+      - "Please use the correct format"
+    severity: medium
+    description: "Tool call format error - model did not follow required format"
+
+  tool_invalid_args:
+    patterns:
+      - "Invalid arguments for"
+      - "Missing required parameter"
+    severity: medium
+    description: "Invalid tool arguments"
+
+  tool_parse_error:
+    patterns:
+      - "Could not parse tool call"
+      - "Failed to parse"
+    severity: medium
+    description: "Tool call parsing failure"
+
+  tool_unknown:
+    patterns:
+      - "Unknown tool '"
+    severity: high
+    description: "Model called a non-existent tool name"
+
+  # ----- Python Execution Errors -----
+  python_traceback:
+    patterns:
+      - "Traceback (most recent call last)"
+    severity: high
+    description: "Python execution exception with traceback"
+
+  python_name_error:
+    patterns:
+      - "NameError:"
+    severity: high
+    description: "Undefined variable reference"
+
+  python_syntax_error:
+    patterns:
+      - "SyntaxError:"
+    severity: high
+    description: "Python syntax error"
+
+  python_indentation_error:
+    patterns:
+      - "IndentationError:"
+    severity: high
+    description: "Python indentation error"
+
+  python_type_error:
+    patterns:
+      - "TypeError:"
+    severity: high
+    description: "Type mismatch error"
+
+  python_value_error:
+    patterns:
+      - "ValueError:"
+    severity: medium
+    description: "Invalid value error"
+
+  python_index_error:
+    patterns:
+      - "IndexError:"
+    severity: medium
+    description: "Index out of bounds"
+
+  python_key_error:
+    patterns:
+      - "KeyError:"
+    severity: medium
+    description: "Dictionary key not found"
+
+  python_attribute_error:
+    patterns:
+      - "AttributeError:"
+    severity: medium
+    description: "Attribute access error"
+
+  python_import_error:
+    patterns:
+      - "ImportError:"
+      - "ModuleNotFoundError:"
+    severity: medium
+    description: "Module import failure"
+
+  python_zero_division:
+    patterns:
+      - "ZeroDivisionError:"
+    severity: medium
+    description: "Division by zero"
+
+  python_timeout:
+    patterns:
+      - "Execution timed out"
+    severity: high
+    description: "Code execution timeout"
+
+  # ----- Search Tool Errors -----
+  search_no_results:
+    patterns:
+      - "No results found"
+      - "no results found"
+    severity: high
+    description: "Search returned no results"
+
+  search_http_error:
+    patterns:
+      - "HTTPSConnectionPool"
+      - "HTTPConnectionPool"
+    severity: low
+    description: "HTTP connection error during search"
+
+  search_rate_limit:
+    patterns:
+      - "rate limit"
+      - "Rate limit"
+      - "quota exceeded"
+    severity: low
+    description: "Search rate limit exceeded"
+
+  # ----- Browse Tool Errors -----
+  # Note: These are external failures, not model errors. Keep severity low.
+  browse_403:
+    patterns:
+      - "HTTP 403"
+      - "status code 403"
+      - "Error 403"
+      - "403 Forbidden"
+    severity: low
+    description: "HTTP 403 Forbidden"
+
+  browse_404:
+    patterns:
+      - "HTTP 404"
+      - "status code 404"
+      - "Error 404"
+      - "404 Not Found"
+    severity: low
+    description: "HTTP 404 Not Found"
+
+  browse_access_denied:
+    patterns:
+      - "Access Denied"
+      - "access denied"
+      - "Forbidden"
+    severity: low
+    description: "Access denied to resource"
+
+  browse_paywall:
+    patterns:
+      - "paywall"
+      - "subscription required"
+      - "login required"
+    severity: low
+    description: "Paywall or subscription block"
+
+  browse_timeout:
+    patterns:
+      - "timed out"
+      - "Timed out"
+    severity: low
+    description: "Browse request timeout"
+
+  # ----- Extension Point -----
+  # Add custom rules here at runtime
+  custom_rules: []
+
+# =============================================================================
+# ScienceWorld Benchmark Rules
+# =============================================================================
+# Note: Only penalize truly invalid actions (unparseable by environment).
+# Environmental feedback like "door is not open" or "object is broken" are
+# normal exploration results, not model errors.
+
+scienceworld:
+  no_known_action:
+    patterns:
+      - "No known action matches that input"
+    severity: high
+    description: "Invalid action command not recognized by environment"
+
+  # ----- Extension Point -----
+  custom_rules: []

@@ -1,0 +1,30 @@
+# Provider Configuration
+#
+# Configure API providers for custom endpoints.
+#
+# Built-in providers (no configuration needed):
+#   - openai: api.openai.com (OPENAI_API_KEY)
+#   - anthropic: api.anthropic.com (ANTHROPIC_API_KEY)
+#   - azure: Azure OpenAI (AZURE_API_KEY)
+#   - ollama: localhost:11434 (no key needed)
+#
+# Configuration Options:
+#   - api_base: Base URL for API calls
+#   - api_key_env: Environment variable name for API key
+#   - openai_compatible: Whether the API is OpenAI-compatible
+#   - extra_headers: Additional HTTP headers to include
+
+providers:
+  # Example: Custom OpenAI-compatible proxy
+  # my_proxy:
+  #   api_base: "https://your-proxy.com/v1"
+  #   api_key_env: "MY_PROXY_API_KEY"
+  #   openai_compatible: true
+  #   extra_headers:
+  #     X-Custom-Header: "value"
+
+  # Example: Self-hosted vLLM server
+  # vllm:
+  #   api_base: "http://localhost:8000/v1"
+  #   api_key_env: ""
+  #   openai_compatible: true

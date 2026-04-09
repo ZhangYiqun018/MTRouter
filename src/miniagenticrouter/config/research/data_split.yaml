@@ -1,0 +1,147 @@
+# Data Split Configuration for Learned Router Research
+# Version: 1.0
+# Created: 2024-12
+# DO NOT MODIFY after data collection begins
+
+split_seed: 42
+split_version: "v1.0"
+
+# =============================================================================
+# Full Task Split (for complete experiments)
+# =============================================================================
+
+train_tasks:
+  - boil
+  - melt
+  - chemistry-mix
+  - find-animal
+  - find-plant
+  - grow-plant
+  - identify-life-stages-1
+  - lifespan-longest-lived
+  - inclined-plane-determine-angle
+  - measure-melting-point-known-substance
+  - power-component
+  - test-conductivity
+  - mendelian-genetics-known-plant
+
+ood_test_tasks:
+  - freeze
+  - change-the-state-of-matter-of
+  - chemistry-mix-paint-secondary-color
+  - find-non-living-thing
+  - grow-fruit
+  - identify-life-stages-2
+  - lifespan-shortest-lived
+  - inclined-plane-friction-unnamed-surfaces
+  - use-thermometer
+  - power-component-renewable-vs-nonrenewable-energy
+  - test-conductivity-of-unknown-substances
+  - mendelian-genetics-unknown-plant
+
+# =============================================================================
+# First-try Subset (for quick validation)
+# =============================================================================
+
+first_try:
+  train_tasks:
+    - boil                              # Thermal (easy)
+    - chemistry-mix                     # Chemistry
+    - find-animal                       # Find (large action space)
+    - grow-plant                        # Growth (multi-step)
+    - identify-life-stages-1            # Life stages (reasoning)
+    - power-component                   # Electrical (procedural)
+    - measure-melting-point-known-substance  # Measurement
+    - test-conductivity                 # Conductivity
+    - mendelian-genetics-known-plant    # Genetics (complex)
+
+  ood_test_tasks:
+    - freeze                            # Thermal (similar to boil)
+    - chemistry-mix-paint-secondary-color
+    - find-non-living-thing
+    - grow-fruit
+    - identify-life-stages-2
+    - power-component-renewable-vs-nonrenewable-energy
+    - use-thermometer
+    - test-conductivity-of-unknown-substances
+    - mendelian-genetics-unknown-plant
+
+# =============================================================================
+# Variation Split (within training tasks)
+# =============================================================================
+
+variation_split:
+  train_ratio: 0.6
+  val_ratio: 0.2
+  test_id_ratio: 0.2
+
+  # Cap variations for tasks with too many
+  max_variations_per_task: 30
+
+  # Minimum variations required (skip tasks with fewer)
+  min_variations_per_task: 10
+
+# =============================================================================
+# Model Pool (model_id references custom_models.yaml for details)
+# =============================================================================
+# Cost and display_name are looked up from custom_models.yaml at runtime.
+# You can configure any number of models (2+ recommended for routing research).
+
+models:
+  # Model pool for roulette/baseline data collection modes
+  # These models are used when collecting training data with uniform random selection
+  roulette_model_pool:
+    - deepseek/deepseek-v3.2
+    - openai/gpt-5
+    - minimax/minimax-m2
+    - moonshotai/kimi-k2-0905
+    - google/gemini-2.5-flash-lite
+    - openai/gpt-oss-120b
+
+  # Fallback model for ContextWindowExceededError
+  # Used when selected model's context window is too small for current conversation
+  # Should be a model with large context window (e.g., 1M+ tokens)
+  # Set to null to disable fallback (will raise error instead)
+  fallback_model: openai/gpt-5  # 2M context
+
+# =============================================================================
+# Data Collection Settings
+# =============================================================================
+
+collection:
+  # Baseline collection (single model per trajectory)
+  baseline:
+    runs_per_variation: 3
+
+  # Roulette collection (mixed models)
+  roulette:
+    runs_per_variation: 5
+    record_propensity: true
+
+  # Agent settings
+  agent:
+    step_limit: 50
+    cost_limit: 2.0  # USD per episode
+
+# =============================================================================
+# Evaluation Metrics
+# =============================================================================
+
+metrics:
+  primary:
+    - name: final_score
+      description: "Environment score at episode end"
+
+    - name: success_rate
+      description: "Fraction of episodes with score >= threshold"
+      threshold: 1.0
+
+  secondary:
+    - name: episode_cost
+      description: "Total cost (USD) per episode"
+
+    - name: episode_steps
+      description: "Number of steps taken"
+
+    - name: format_error_rate
+      description: "Fraction of steps with parser errors"

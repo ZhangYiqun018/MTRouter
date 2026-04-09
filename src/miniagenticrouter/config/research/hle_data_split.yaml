@@ -1,0 +1,99 @@
+# HLE Data Split Configuration for Learned Router Research
+# Version: 1.0
+# Created: 2024-12
+# DO NOT MODIFY after data collection begins
+
+split_seed: 42
+split_version: "v1.0"
+skip_multimodal: true
+
+# =============================================================================
+# Category Split
+# =============================================================================
+# HLE has 8 categories with ~2158 text-only tasks:
+#   - Math (976), CS/AI (224), Physics (202), Biology/Medicine (222)
+#   - Chemistry (101), Engineering (64), Humanities/Social Science (193), Other (176)
+#
+# Train categories: STEM fields (~1789 text-only tasks)
+# OOD test categories: Non-STEM fields (~369 text-only tasks)
+
+train_categories:
+  - "Math"
+  - "Computer Science/AI"
+  - "Physics"
+  - "Biology/Medicine"
+  - "Chemistry"
+  - "Engineering"
+
+ood_test_categories:
+  - "Humanities/Social Science"
+  - "Other"
+
+# =============================================================================
+# Task Split (within training categories)
+# =============================================================================
+# Tasks from train_categories are split into train/val/test_id
+# This tests in-distribution generalization
+
+task_split:
+  train_ratio: 0.6    # ~1073 tasks
+  val_ratio: 0.2      # ~358 tasks
+  test_id_ratio: 0.2  # ~358 tasks
+
+# =============================================================================
+# Model Pool (model_id references custom_models.yaml for details)
+# =============================================================================
+
+models:
+  # Model pool for roulette/baseline data collection modes
+  roulette_model_pool:
+    - deepseek/deepseek-v3.2
+    - openai/gpt-5
+    - minimax/minimax-m2
+    - moonshotai/kimi-k2-0905
+    - google/gemini-2.5-flash-lite
+    - openai/gpt-oss-120b
+
+  # Fallback model for ContextWindowExceededError
+  # Used when selected model's context window is too small for current conversation
+  # Should be a model with large context window (e.g., 1M+ tokens)
+  # Set to null to disable fallback (will raise error instead)
+  fallback_model: x-ai/grok-4.1-fast  # 1M context
+
+# =============================================================================
+# Data Collection Settings
+# =============================================================================
+
+collection:
+  # Baseline collection (single model per task)
+  baseline:
+    runs_per_task: 3
+
+  # Roulette collection (mixed models)
+  roulette:
+    runs_per_task: 5
+    record_propensity: true
+
+  # Agent settings
+  agent:
+    step_limit: 25
+    cost_limit: 5.0  # USD per episode
+
+# =============================================================================
+# Evaluation Metrics
+# =============================================================================
+
+metrics:
+  primary:
+    - name: judge_score
+      description: "LLM-as-a-Judge binary score (0 or 1)"
+
+    - name: success_rate
+      description: "Fraction of tasks with judge_score = 1"
+
+  secondary:
+    - name: episode_cost
+      description: "Total cost (USD) per episode"
+
+    - name: episode_steps
+      description: "Number of steps taken"

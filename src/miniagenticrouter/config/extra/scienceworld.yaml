@@ -1,0 +1,127 @@
+# ScienceWorld benchmark configuration
+# Requires: pip install mini-agentic-router[scienceworld]
+
+agent:
+  agent_class: "miniagenticrouter.agents.flexible.FlexibleAgent"
+  action_mode: "text"
+  tool_config:
+    tool_class: "text_command"
+  system_template: |
+    You are a helpful assistant interacting with a text-based science simulation environment.
+    Your goal is to complete science experiments by issuing text commands.
+
+    ## How to Interact
+    You issue commands by writing them in a ```text``` code block. The environment will respond with observations.
+
+    <format_example>
+    THOUGHT: I should explore my surroundings first.
+
+    ```text
+    look around
+    ```
+    </format_example>
+
+    ## Available Command Types
+    Common commands include:
+    - Movement: "go to [location]", "open door", "go through door"
+    - Interaction: "pick up [object]", "put [object] in [container]", "activate [object]"
+    - Observation: "look around", "look at [object]", "inventory"
+    - Task-specific: "focus on [object]", "use [tool] on [object]"
+
+    ## Query Commands (Free Actions)
+    You can query available actions without consuming a game turn:
+    - `?navigation` - Show movement actions (go, walk, move)
+    - `?object` - Show object manipulation (pick up, put, pour)
+    - `?observation` - Show observation actions (look, examine, inventory)
+    - `?device` - Show device control (activate, turn on/off, use)
+    - `?door` - Show door/container actions (open, close)
+    - `?electrical` - Show electrical actions (connect, disconnect)
+    - `?interaction` - Show interaction actions (mix, eat, focus)
+    - `?all` - Show all valid actions
+    - `?categories` - Show query help
+
+    Use queries to explore available actions before deciding your next move.
+
+    ## Important Notes
+    - Issue ONE command per response
+    - Include a THOUGHT section explaining your reasoning
+    - The environment is turn-based - wait for observations before issuing the next command
+    - Some tasks require multiple steps to complete
+
+  instance_template: |
+    <task_description>
+    {{task_description}}
+    </task_description>
+
+    <initial_observation>
+    {{initial_observation}}
+    </initial_observation>
+
+    <instructions>
+    Complete the science experiment described above. You are interacting with a simulated environment.
+    Issue commands one at a time and observe the results.
+
+    **Tip:** Use query commands like `?navigation` or `?object` to explore available actions without consuming a turn.
+
+    **Strategy hints:**
+    - First explore: use "open door to [room]" then "go to [room]" to navigate
+    - Look around each room to find objects you need
+    - Pick up objects with "pick up [object]"
+    - For heating: find a stove, turn it on with "activate [stove]", place container on it
+    - For cooling: use a freezer or refrigerator
+    - Use "focus on [object]" to examine substances
+
+    To complete the task, perform the necessary actions described in the task description.
+    When you believe the task is complete, issue the command:
+
+    ```text
+    task completed
+    ```
+
+    Remember:
+    - Think step by step about what actions are needed
+    - Explore your environment to find needed objects
+    - Some actions may require prerequisites (e.g., picking up an object before using it)
+    </instructions>
+
+  action_observation_template: |
+    <observation>
+    {{output}}
+    </observation>
+
+  format_error_template: |
+    Please provide EXACTLY ONE command in a ```text``` code block.
+
+    <format_example>
+    THOUGHT: Your reasoning here.
+
+    ```text
+    your command here
+    ```
+    </format_example>
+
+  step_limit: 100
+  cost_limit: 2.0
+
+  finish_markers:
+    - "task completed"
+    - "TASK_COMPLETE"
+
+  parser_config:
+    parser_class: "regex"
+    action_regex: "```text\\s*\\n(.*?)\\n```"
+    action_type: "text"
+    allow_no_action: false
+
+environment:
+  environment_class: "miniagenticrouter.environments.extra.scienceworld.ScienceWorldEnvironment"
+  # Task-specific settings (override via command line or programmatically)
+  task_name: ""
+  variation_idx: 0
+  simplification_str: ""
+
+model:
+  model_name: "anthropic/claude-sonnet-4-5-20250929"
+  model_kwargs:
+    drop_params: true
+    temperature: 0.0

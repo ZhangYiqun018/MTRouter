@@ -1,0 +1,21 @@
+# LLMRouter default configuration
+#
+# This config provides default settings for the LLM-based router.
+# The router uses an LLM policy to decide which model to use for each query.
+
+llmrouter:
+  # Policy model for making routing decisions
+  # policy_model: deepseek/deepseek-v3.2
+  policy_model: qwen/qwen-2.5-7b-instruct
+
+  # Model descriptors (used in the prompt to help the policy LLM understand each model)
+  # Format: model_name: "description of strengths, cost, and best use cases"
+  # Cost format: input/output per million tokens in USD
+  # Performance data from ScienceWorld (SW) and HLE benchmarks
+  model_descriptors:
+    openai/gpt-oss-120b: "Cost 0.09/0.36. 131K context. Lowest cost with SW 33% SR and HLE 10% SR. Excellent cost-efficiency for moderate difficulty tasks."
+    google/gemini-2.5-flash-lite: "Cost 0.1/0.4. 1M context. SW 23% SR and HLE 6% SR. Largest context window. Best for long document analysis."
+    openai/gpt-5: "Cost 1.25/10. 400K context. Top performer with SW 48% SR and HLE 25% SR. Best for complex multi-step reasoning and hard science problems."
+    moonshotai/kimi-k2-0905: "Cost 0.39/1.9. 131K context. SW 31% SR and HLE 11% SR. Balanced option for general-purpose tasks with good instruction following."
+    deepseek/deepseek-v3.2: "Cost 0.27/0.42. 164K context. SW 16% SR and HLE 16% SR. Strong on math and coding. Good for structured reasoning tasks."
+    minimax/minimax-m2: "Cost 0.2/1. 196K context. SW 22% SR and HLE 8% SR. Fast inference. Suitable for simple QA and straightforward tasks."

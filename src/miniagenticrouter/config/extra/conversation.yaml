@@ -1,0 +1,43 @@
+# Pure conversation mode configuration
+# No tool execution, just multi-turn dialogue
+
+agent:
+  agent_class: "miniagenticrouter.agents.flexible.FlexibleAgent"
+  action_mode: "none"
+  system_template: |
+    You are a helpful AI assistant engaged in a multi-turn conversation.
+    Respond naturally and helpfully to the user's questions and requests.
+
+    You do NOT have access to any tools or external systems. Your responses
+    should be based solely on your knowledge and reasoning capabilities.
+
+    Be clear, concise, and helpful in your responses.
+
+  instance_template: |
+    {{task}}
+
+  action_observation_template: ""
+
+  format_error_template: ""
+
+  step_limit: 50
+  cost_limit: 1.0
+
+  finish_markers: []
+  finish_on_action: null
+
+  parser_config:
+    parser_class: "noaction"
+    action_type: "none"
+
+  tool_config:
+    tool_class: "noop"
+
+# No environment needed for pure conversation
+environment: null
+
+model:
+  model_name: "anthropic/claude-sonnet-4-5-20250929"
+  model_kwargs:
+    drop_params: true
+    temperature: 0.7
