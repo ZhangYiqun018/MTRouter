@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-"""Run mini-SWE-agent in your local environment. This is the default executable `mini`."""
-# Read this first: https://mini-agentic-router.dev/latest/usage/mini/  (usage)
+"""Run MTRouter in your local environment. This powers the `mtr` and `mar` CLIs."""
+# Project docs: https://github.com/ZhangYiqun018/MTRouter
 
 import os
 import traceback
@@ -30,15 +30,15 @@ DEFAULT_OUTPUT = global_config_dir / "last_mini_run.traj.json"
 console = Console(highlight=False)
 app = typer.Typer(rich_markup_mode="rich")
 prompt_session = PromptSession(history=FileHistory(global_config_dir / "mini_task_history.txt"))
-_HELP_TEXT = """Run mini-SWE-agent in your local environment.
+_HELP_TEXT = """Run MTRouter in your local environment.
 
 [not dim]
 There are two different user interfaces:
 
-[bold green]mini[/bold green] Simple REPL-style interface
-[bold green]mini -v[/bold green] Pager-style interface (Textual)
+[bold green]mtr[/bold green] Simple REPL-style interface
+[bold green]mtr -v[/bold green] Pager-style interface (Textual)
 
-More information about the usage: [bold green]https://mini-agentic-router.dev/latest/usage/mini/[/bold green]
+Project repository: [bold green]https://github.com/ZhangYiqun018/MTRouter[/bold green]
 [/not dim]
 """
 
