@@ -66,8 +66,8 @@ class RequestyModel:
         headers = {
             "Authorization": f"Bearer {self._api_key}",
             "Content-Type": "application/json",
-            "HTTP-Referer": "https://github.com/anonymous/mini-agentic-router",
-            "X-Title": "mini-agentic-router",
+            "HTTP-Referer": "https://github.com/ZhangYiqun018/MTRouter",
+            "X-Title": "MTRouter",
         }
 
         payload = {
@@ -82,7 +82,7 @@ class RequestyModel:
             return response.json()
         except requests.exceptions.HTTPError as e:
             if response.status_code == 401:
-                error_msg = "Authentication failed. You can permanently set your API key with `mini-extra config set REQUESTY_API_KEY YOUR_KEY`."
+                error_msg = "Authentication failed. You can permanently set your API key with `mtr-extra config set REQUESTY_API_KEY YOUR_KEY`."
                 raise RequestyAuthenticationError(error_msg) from e
             elif response.status_code == 429:
                 raise RequestyRateLimitError("Rate limit exceeded") from e
