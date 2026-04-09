@@ -3,7 +3,7 @@
 This module provides encoders and training utilities for learned routers.
 
 This module requires additional dependencies:
-    pip install mini-agentic-router[research]
+    pip install mtrouter[research]
 """
 
 from .dataset import TrajectoryDataset, collate_fn, collate_fn_precomputed
