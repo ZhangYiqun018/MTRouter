@@ -40,13 +40,13 @@ def main(
     """Run a single ScienceWorld task.
 
     Example:
-        mar-extra scienceworld-single boil --variation 0
-        mar-extra scienceworld-single --list-tasks
-        mar-extra scienceworld-single boil -V  # verbose mode
+        mtr-extra scienceworld-single boil --variation 0
+        mtr-extra scienceworld-single --list-tasks
+        mtr-extra scienceworld-single boil -V  # verbose mode
 
     Router examples:
-        mar-extra scienceworld-single boil -V -r roulette -m "openai/gpt-4o,claude/claude-sonnet-4-5-20250929"
-        mar-extra scienceworld-single boil -r interleaving -m "model1,model2"
+        mtr-extra scienceworld-single boil -V -r roulette -m "openai/gpt-4o,claude/claude-sonnet-4-5-20250929"
+        mtr-extra scienceworld-single boil -r interleaving -m "model1,model2"
     """
     if list_tasks:
         task_names = get_scienceworld_task_names()
