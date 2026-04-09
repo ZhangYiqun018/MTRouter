@@ -60,7 +60,7 @@ class PortkeyModel:
             raise ValueError(
                 "Portkey API key is required. Set it via the "
                 "PORTKEY_API_KEY environment variable. You can permanently set it with "
-                "`mini-extra config set PORTKEY_API_KEY YOUR_KEY`."
+                "`mtr-extra config set PORTKEY_API_KEY YOUR_KEY`."
             )
 
         # Get virtual key from environment
