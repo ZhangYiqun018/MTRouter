@@ -35,7 +35,9 @@ def enumerate_scienceworld_tasks(
     try:
         from scienceworld import ScienceWorldEnv
     except ImportError as e:
-        raise ImportError("ScienceWorld is not installed. Install with: pip install mtrouter[scienceworld]") from e
+        raise ImportError(
+            "ScienceWorld is not installed. Install from a repo checkout with: pip install -e '.[scienceworld]'"
+        ) from e
 
     # Create temporary environment to enumerate tasks
     env = ScienceWorldEnv("", serverPath=None)
@@ -77,7 +79,9 @@ def get_scienceworld_task_names() -> list[str]:
     try:
         from scienceworld import ScienceWorldEnv
     except ImportError as e:
-        raise ImportError("ScienceWorld is not installed. Install with: pip install mtrouter[scienceworld]") from e
+        raise ImportError(
+            "ScienceWorld is not installed. Install from a repo checkout with: pip install -e '.[scienceworld]'"
+        ) from e
 
     env = ScienceWorldEnv("", serverPath=None)
     try:
@@ -102,7 +106,9 @@ def get_scienceworld_task_info(task_name: str, simplification_str: str = "") -> 
     try:
         from scienceworld import ScienceWorldEnv
     except ImportError as e:
-        raise ImportError("ScienceWorld is not installed. Install with: pip install mtrouter[scienceworld]") from e
+        raise ImportError(
+            "ScienceWorld is not installed. Install from a repo checkout with: pip install -e '.[scienceworld]'"
+        ) from e
 
     env = ScienceWorldEnv("", serverPath=None)
     try:
