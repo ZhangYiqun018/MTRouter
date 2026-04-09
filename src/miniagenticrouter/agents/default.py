@@ -1,4 +1,4 @@
-"""Basic agent class. See https://mini-agentic-router.dev/latest/advanced/control_flow/ for visual explanation."""
+"""Basic agent class. See https://github.com/ZhangYiqun018/MTRouter for project documentation."""
 
 import re
 import subprocess
