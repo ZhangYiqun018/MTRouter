@@ -3,7 +3,7 @@
 This module provides encoders and training utilities for learned routers.
 
 This module requires additional dependencies:
-    pip install mtrouter[research]
+    pip install -e '.[research]'
 """
 
 from .dataset import TrajectoryDataset, collate_fn, collate_fn_precomputed
