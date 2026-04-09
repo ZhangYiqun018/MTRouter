@@ -1,5 +1,5 @@
 # ScienceWorld benchmark configuration
-# Requires: pip install mtrouter[scienceworld]
+# Requires: pip install -e ".[scienceworld]"
 
 agent:
   agent_class: "miniagenticrouter.agents.flexible.FlexibleAgent"
