@@ -1,8 +1,12 @@
-# Mini Agentic Router 使用指南
+# MTRouter 使用指南
 
-本文档介绍如何使用 mini-agentic-router 来解决 SWE-bench 中的题目，以及如何配置模型和路由模式。
+本文档介绍如何使用 MTRouter 来解决 SWE-bench 中的题目，以及如何配置模型和路由模式。
 
 > **Note:** 本项目基于 [mini-swe-agent](https://github.com/SWE-agent/mini-swe-agent) 二次开发，提供了增强的模型路由功能。
+>
+> **论文进展：** MTRouter 对应论文已被 ACL 2026 Main Conference 接收。
+>
+> **兼容性说明：** Python 包导入路径仍为 `miniagenticrouter`，CLI 推荐使用 `mtr` / `mtr-extra`（旧的 `mar` / `mar-extra` 仍可继续使用）。
 
 ---
 
@@ -21,8 +25,8 @@
 
 ```bash
 # 从源码安装（开发模式）
-git clone https://github.com/anonymous/mini-agentic-router.git
-cd mini-agentic-router && pip install -e .
+git clone https://github.com/ZhangYiqun018/MTRouter.git
+cd MTRouter && pip install -e .
 ```
 
 ---
@@ -33,14 +37,14 @@ cd mini-agentic-router && pip install -e .
 
 ```bash
 # 运行所有题目
-mar-extra swebench \
+mtr-extra swebench \
     --model anthropic/claude-sonnet-4-5-20250929 \
     --subset verified \
     --split test \
     --workers 4
 
 # 运行前5道题（使用 --slice）
-mar-extra swebench \
+mtr-extra swebench \
     --model anthropic/claude-sonnet-4-5-20250929 \
     --subset verified \
     --split test \
@@ -48,7 +52,7 @@ mar-extra swebench \
     --workers 4
 
 # 通过正则表达式过滤特定题目（使用 --filter）
-mar-extra swebench \
+mtr-extra swebench \
     --model anthropic/claude-sonnet-4-5-20250929 \
     --subset verified \
     --split test \
@@ -62,21 +66,21 @@ mar-extra swebench \
 
 ```bash
 # 通过 instance ID 指定题目
-mar-extra swebench-single \
+mtr-extra swebench-single \
     --subset verified \
     --split test \
     --model anthropic/claude-sonnet-4-5-20250929 \
     -i sympy__sympy-15599
 
 # 或通过索引指定（第一道题）
-mar-extra swebench-single \
+mtr-extra swebench-single \
     --subset verified \
     --split test \
     --model anthropic/claude-sonnet-4-5-20250929 \
     -i 0
 
 # 运行后立即退出（不提示确认）
-mar-extra swebench-single \
+mtr-extra swebench-single \
     --subset verified \
     --split test \
     --model anthropic/claude-sonnet-4-5-20250929 \
@@ -110,25 +114,25 @@ mar-extra swebench-single \
 
 ```bash
 # 方式一（推荐）：交互式设置
-mar-extra config setup
+mtr-extra config setup
 
 # 方式二：命令行设置
-mar-extra config set ANTHROPIC_API_KEY "your-api-key"
-mar-extra config set OPENAI_API_KEY "your-api-key"
+mtr-extra config set ANTHROPIC_API_KEY "your-api-key"
+mtr-extra config set OPENAI_API_KEY "your-api-key"
 
 # 方式三：环境变量
 export ANTHROPIC_API_KEY="your-api-key"
 export OPENAI_API_KEY="your-api-key"
 
 # 如果只用单一模型，可以设置通用 key
-mar-extra config set MAR_MODEL_API_KEY "your-api-key"
+mtr-extra config set MAR_MODEL_API_KEY "your-api-key"
 ```
 
 ### 2. 设置默认模型
 
 ```bash
 # 命令行设置
-mar-extra config set MAR_MODEL_NAME "anthropic/claude-sonnet-4-5-20250929"
+mtr-extra config set MAR_MODEL_NAME "anthropic/claude-sonnet-4-5-20250929"
 
 # 或使用环境变量
 export MAR_MODEL_NAME="anthropic/claude-sonnet-4-5-20250929"
@@ -197,7 +201,7 @@ EOF
 #     api_base: "http://localhost:8000/v1"
 
 # 4. 运行
-LITELLM_MODEL_REGISTRY_PATH=registry.json mar-extra swebench \
+LITELLM_MODEL_REGISTRY_PATH=registry.json mtr-extra swebench \
     --output test/ --subset verified --split test --filter '^(django__django-11099)$'
 ```
 
@@ -273,7 +277,7 @@ model:
 ### 使用预置的 Roulette 配置运行 SWE-bench
 
 ```bash
-mar-extra swebench \
+mtr-extra swebench \
     --config swebench_roulette \
     --subset verified \
     --split test \
@@ -322,10 +326,10 @@ python -m swebench.harness.run_evaluation \
 
 ```bash
 # 设置调用次数限制
-mar-extra config set MAR_GLOBAL_CALL_LIMIT 100
+mtr-extra config set MAR_GLOBAL_CALL_LIMIT 100
 
 # 设置美元成本限制
-mar-extra config set MAR_GLOBAL_COST_LIMIT 10.00
+mtr-extra config set MAR_GLOBAL_COST_LIMIT 10.00
 
 # 或使用环境变量
 export MAR_GLOBAL_CALL_LIMIT=100
@@ -337,7 +341,7 @@ export MAR_GLOBAL_COST_LIMIT=10.00
 使用 Singularity/Apptainer：
 
 ```bash
-mar-extra swebench \
+mtr-extra swebench \
     --environment-class singularity \
     ...
 ```
@@ -361,7 +365,7 @@ export MAR_COST_TRACKING="ignore_errors"
 只要数据集遵循 SWE-bench 格式：
 
 ```bash
-mar-extra swebench \
+mtr-extra swebench \
     --subset /path/to/your/dataset \
     ...
 ```
