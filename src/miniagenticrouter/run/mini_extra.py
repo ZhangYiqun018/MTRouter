@@ -20,7 +20,7 @@ subcommands = [
 
 def get_docstring() -> str:
     lines = [
-        "This is the [yellow]central entry point for all extra commands[/yellow] from mini-agentic-router.",
+        "This is the [yellow]central entry point for all extra commands[/yellow] from MTRouter.",
         "",
         "Available sub-commands:",
         "",
@@ -39,7 +39,7 @@ def main():
 
     for module_path, aliases, _ in subcommands:
         if args[0] in aliases:
-            return import_module(module_path).app(args[1:], prog_name=f"mini-extra {aliases[0]}")
+            return import_module(module_path).app(args[1:], prog_name=f"mtr-extra {aliases[0]}")
 
     return Console().print(get_docstring())
 
