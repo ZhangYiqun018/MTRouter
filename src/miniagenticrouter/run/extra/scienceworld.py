@@ -28,7 +28,7 @@ from miniagenticrouter.run.utils.router import create_model_or_router
 from miniagenticrouter.run.utils.save import save_traj
 from miniagenticrouter.utils.log import add_file_handler, logger
 
-_HELP_TEXT = """Run mini-agentic-router on ScienceWorld benchmark tasks.
+_HELP_TEXT = """Run MTRouter on ScienceWorld benchmark tasks.
 
 [not dim]
 ScienceWorld is a text-based science simulation environment for evaluating
