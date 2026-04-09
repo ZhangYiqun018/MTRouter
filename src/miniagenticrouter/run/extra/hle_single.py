@@ -50,13 +50,13 @@ def main(
     """Run a single HLE (Humanity's Last Exam) task.
 
     Example:
-        mini-extra hle-single --stats
-        mini-extra hle-single --list-tasks -n 20
-        mini-extra hle-single --index 0 -V  # verbose mode with first task
-        mini-extra hle-single <task_id> -m anthropic/claude-sonnet-4-5-20250929
+        mtr-extra hle-single --stats
+        mtr-extra hle-single --list-tasks -n 20
+        mtr-extra hle-single --index 0 -V  # verbose mode with first task
+        mtr-extra hle-single <task_id> -m anthropic/claude-sonnet-4-5-20250929
 
     Router examples:
-        mini-extra hle-single -i 0 -V -r roulette -m "openai/gpt-4o,anthropic/claude-sonnet-4-5-20250929"
+        mtr-extra hle-single -i 0 -V -r roulette -m "openai/gpt-4o,anthropic/claude-sonnet-4-5-20250929"
     """
     # Handle info commands
     if stats:
