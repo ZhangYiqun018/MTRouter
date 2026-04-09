@@ -43,7 +43,7 @@ class WebBrowseConfig:
     timeout: int = 30
     use_jina: bool = False
     jina_api_key: str | None = None
-    user_agent: str = "Mozilla/5.0 (compatible; mini-agentic-router/1.0)"
+    user_agent: str = "Mozilla/5.0 (compatible; MTRouter/1.0)"
 
     # LLM summarization settings (aligned with DeepResearch)
     use_llm_summary: bool = False
