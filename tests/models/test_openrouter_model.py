@@ -108,7 +108,7 @@ def test_openrouter_model_authentication_error():
                     model._query(messages)
 
                 assert "Authentication failed" in str(exc_info.value)
-                assert "mini-extra config set OPENROUTER_API_KEY" in str(exc_info.value)
+                assert "mtr-extra config set OPENROUTER_API_KEY" in str(exc_info.value)
 
 
 def test_openrouter_model_no_cost_information(mock_response_no_cost):
