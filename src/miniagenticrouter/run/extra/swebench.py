@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-"""Run mini-SWE-agent on SWE-bench instances in batch mode."""
-# Read this first: https://mini-agentic-router.dev/latest/usage/swebench/  (usage docs)
+"""Run MTRouter on SWE-bench instances in batch mode."""
+# Project docs: https://github.com/ZhangYiqun018/MTRouter
 
 import concurrent.futures
 import json
@@ -27,10 +27,10 @@ from miniagenticrouter.run.extra.utils.batch_progress import RunBatchProgressMan
 from miniagenticrouter.run.utils.save import save_traj
 from miniagenticrouter.utils.log import add_file_handler, logger
 
-_HELP_TEXT = """Run mini-SWE-agent on SWEBench instances.
+_HELP_TEXT = """Run MTRouter on SWEBench instances.
 
 [not dim]
-More information about the usage: [bold green]https://mini-agentic-router.dev/latest/usage/swebench/[/bold green]
+Project repository: [bold green]https://github.com/ZhangYiqun018/MTRouter[/bold green]
 [/not dim]
 """
 
