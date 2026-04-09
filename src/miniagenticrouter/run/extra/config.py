@@ -41,7 +41,7 @@ Here's a few popular models and the required API keys:
 
 [bold yellow]You can leave any setting blank to skip it.[/bold yellow]
 
-More information at https://mini-agentic-router.dev/latest/quickstart/
+More information at https://github.com/ZhangYiqun018/MTRouter
 To find the best model, check the leaderboard at https://swebench.com/
 """
 
