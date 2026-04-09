@@ -1,6 +1,8 @@
-# MTRouter: Cost-Aware Multi-Turn LLM Routing with History–Model Joint Embeddings
+# MTRouter: Cost-Aware Multi-Turn LLM Routing with History-Model Joint Embeddings
 
-> A cost-aware multi-turn LLM routing framework that learns to select optimal models based on conversation history and model embeddings.
+> Official implementation of MTRouter, a cost-aware multi-turn LLM routing framework accepted to the ACL 2026 Main Conference.
+
+> The Python import path remains `miniagenticrouter` for compatibility, while the preferred CLI aliases are `mtr` and `mtr-extra`.
 
 ## Method
 
@@ -117,10 +119,10 @@ sudo apt-get install default-jre  # Ubuntu/Debian
 
 ```bash
 # Run a single task
-mar-extra scienceworld-single boil --variation 0 -m anthropic/claude-sonnet-4-5-20250929
+mtr-extra scienceworld-single boil --variation 0 -m anthropic/claude-sonnet-4-5-20250929
 
 # Batch evaluation
-mar-extra scienceworld \
+mtr-extra scienceworld \
     --task "boil*" \
     --workers 4 \
     --model anthropic/claude-sonnet-4-5-20250929 \
@@ -131,7 +133,7 @@ mar-extra scienceworld \
 
 ```bash
 # With learned router
-mar-extra scienceworld \
+mtr-extra scienceworld \
     --task "boil*" \
     -r learned \
     -m "openai/gpt-4o,anthropic/claude-sonnet-4-5-20250929" \
