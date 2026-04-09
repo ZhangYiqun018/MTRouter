@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 
 [project]
-name = "mtrouter"
+name = "mini-agentic-router"
 dynamic = ["version"]
 description = "Official implementation of MTRouter, a cost-aware multi-turn LLM routing framework accepted to the ACL 2026 Main Conference."
 readme = "README.md"
@@ -47,10 +47,10 @@ dependencies = [
 
 [project.optional-dependencies]
 full = [
-    "mtrouter[dev]",
-    "mtrouter[scienceworld]",
-    "mtrouter[hle]",
-    "mtrouter[research]",
+    "mini-agentic-router[dev]",
+    "mini-agentic-router[scienceworld]",
+    "mini-agentic-router[hle]",
+    "mini-agentic-router[research]",
     "swe-rex>=1.4.0",
 ]
 
