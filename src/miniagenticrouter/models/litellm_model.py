@@ -108,7 +108,7 @@ class LitellmModel:
                 model=self.config.model_name, messages=messages, **final_kwargs
             )
         except litellm.exceptions.AuthenticationError as e:
-            e.message += " You can permanently set your API key with `mini-extra config set KEY VALUE`."
+            e.message += " You can permanently set your API key with `mtr-extra config set KEY VALUE`."
             raise e
 
     def query(self, messages: list[dict[str, str]], **kwargs) -> dict:
