@@ -5,7 +5,7 @@ science experiment tasks.
 
 !!! warning
     This environment requires the `scienceworld` package to be installed:
-    `pip install mini-agentic-router[scienceworld]`
+    `pip install mtrouter[scienceworld]`
 """
 
 from dataclasses import asdict, dataclass, field
@@ -81,7 +81,7 @@ class ScienceWorldEnvironment:
             except ImportError as e:
                 raise ImportError(
                     "scienceworld package is required. "
-                    "Install with: pip install mini-agentic-router[scienceworld]"
+                    "Install with: pip install mtrouter[scienceworld]"
                 ) from e
 
             self._env = ScienceWorldEnv("")
