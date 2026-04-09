@@ -2,7 +2,7 @@
 """
 Simple trajectory inspector for browsing agent conversation trajectories.
 
-More information about the usage: [bold green] https://mini-agentic-router.dev/latest/usage/inspector/ [/bold green].
+Project documentation: [bold green]https://github.com/ZhangYiqun018/MTRouter[/bold green].
 """
 
 import json
