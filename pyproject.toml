@@ -4,15 +4,15 @@ build-backend = "setuptools.build_meta"
 
 
 [project]
-name = "mini-agentic-router"
+name = "mtrouter"
 dynamic = ["version"]
-description = "Multi-turn benchmark evaluation framework with model routing support. Built on top of mini-swe-agent."
+description = "Official implementation of MTRouter, a cost-aware multi-turn LLM routing framework accepted to the ACL 2026 Main Conference."
 readme = "README.md"
 requires-python = ">=3.10"
 license = {file = "LICENSE.md"}
-keywords = ["nlp", "agents", "benchmarks", "model-routing", "multi-turn", "llm"]
+keywords = ["nlp", "agents", "benchmarks", "model-routing", "multi-turn", "llm", "scienceworld", "acl-2026"]
 authors = [
-    {name = "Anonymous"},
+    {name = "MTRouter Authors"},
 ]
 
 # Classifiers help users find your project by categorizing it.
@@ -47,10 +47,10 @@ dependencies = [
 
 [project.optional-dependencies]
 full = [
-    "mini-agentic-router[dev]",
-    "mini-agentic-router[scienceworld]",
-    "mini-agentic-router[hle]",
-    "mini-agentic-router[research]",
+    "mtrouter[dev]",
+    "mtrouter[scienceworld]",
+    "mtrouter[hle]",
+    "mtrouter[research]",
     "swe-rex>=1.4.0",
 ]
 
@@ -89,10 +89,13 @@ dev = [
 ]
 
 [project.urls]
-Repository = "https://github.com/anonymous/mini-agentic-router"
-"Bug Tracker" = "https://github.com/anonymous/mini-agentic-router/issues"
+Homepage = "https://github.com/ZhangYiqun018/MTRouter"
+Repository = "https://github.com/ZhangYiqun018/MTRouter"
+"Bug Tracker" = "https://github.com/ZhangYiqun018/MTRouter/issues"
 
 [project.scripts]
+mtr = "miniagenticrouter.run.mini:app"
+mtr-extra = "miniagenticrouter.run.mini_extra:main"
 mar = "miniagenticrouter.run.mini:app"
 mar-extra = "miniagenticrouter.run.mini_extra:main"
 
