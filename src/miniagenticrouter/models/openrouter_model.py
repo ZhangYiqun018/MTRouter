@@ -86,7 +86,7 @@ class OpenRouterModel:
             return response.json()
         except requests.exceptions.HTTPError as e:
             if response.status_code == 401:
-                error_msg = "Authentication failed. You can permanently set your API key with `mini-extra config set OPENROUTER_API_KEY YOUR_KEY`."
+                error_msg = "Authentication failed. You can permanently set your API key with `mtr-extra config set OPENROUTER_API_KEY YOUR_KEY`."
                 raise OpenRouterAuthenticationError(error_msg) from e
             elif response.status_code == 429:
                 raise OpenRouterRateLimitError("Rate limit exceeded") from e
