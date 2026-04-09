@@ -1,5 +1,5 @@
 # ScienceWorld benchmark configuration
-# Requires: pip install mini-agentic-router[scienceworld]
+# Requires: pip install mtrouter[scienceworld]
 
 agent:
   agent_class: "miniagenticrouter.agents.flexible.FlexibleAgent"
