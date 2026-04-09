@@ -1,5 +1,5 @@
 """
-Mini Agentic Router - Multi-turn benchmark evaluation framework with model routing support.
+MTRouter - Multi-turn benchmark evaluation framework with model routing support.
 
 This project is built on top of mini-swe-agent (https://github.com/SWE-agent/mini-swe-agent).
 
@@ -31,7 +31,7 @@ global_config_file = Path(global_config_dir) / ".env"
 
 if not os.getenv("MAR_SILENT_STARTUP"):
     Console().print(
-        f"👋 This is [bold green]mini-agentic-router[/bold green] version [bold green]{__version__}[/bold green].\n"
+        f"👋 This is [bold green]MTRouter[/bold green] version [bold green]{__version__}[/bold green].\n"
         f"Loading global config from [bold green]'{global_config_file}'[/bold green]"
     )
 dotenv.load_dotenv(dotenv_path=global_config_file)
