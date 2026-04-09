@@ -5,7 +5,7 @@ science experiment tasks.
 
 !!! warning
     This environment requires the `scienceworld` package to be installed:
-    `pip install mtrouter[scienceworld]`
+    `pip install -e '.[scienceworld]'`
 """
 
 from dataclasses import asdict, dataclass, field
@@ -81,7 +81,7 @@ class ScienceWorldEnvironment:
             except ImportError as e:
                 raise ImportError(
                     "scienceworld package is required. "
-                    "Install with: pip install mtrouter[scienceworld]"
+                    "Install from a repo checkout with: pip install -e '.[scienceworld]'"
                 ) from e
 
             self._env = ScienceWorldEnv("")
