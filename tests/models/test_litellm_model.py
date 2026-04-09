@@ -31,7 +31,7 @@ def test_authentication_error_enhanced_message():
             model._query([{"role": "user", "content": "test"}])
 
         # Check that the error message was enhanced
-        assert "You can permanently set your API key with `mini-extra config set KEY VALUE`." in str(exc_info.value)
+        assert "You can permanently set your API key with `mtr-extra config set KEY VALUE`." in str(exc_info.value)
 
 
 def test_model_registry_loading():
@@ -262,7 +262,7 @@ def test_response_api_model_authentication_error():
         with pytest.raises(litellm.exceptions.AuthenticationError) as exc_info:
             model._query([{"role": "user", "content": "test"}])
 
-        assert "You can permanently set your API key with `mini-extra config set KEY VALUE`." in str(exc_info.value)
+        assert "You can permanently set your API key with `mtr-extra config set KEY VALUE`." in str(exc_info.value)
 
 
 def test_coerce_responses_text_with_output_text_field():
