@@ -97,7 +97,7 @@ def compare_embeddings(
 
 def main():
     # Model path (same as training)
-    model_name = "Alibaba-NLP/gte-Qwen2-1.5B-instruct"
+    model_name = "Qwen/Qwen3-Embedding-0.6B"
 
     print("=" * 70)
     print("vLLM vs HuggingFace Embedding Consistency Test")

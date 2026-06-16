@@ -298,8 +298,9 @@ class LearnedMode(CollectionMode):
     Args:
         checkpoint: Path to trained Q-function checkpoint.
         model_names: List of model names (must match training order).
-        lambda_: Cost penalty coefficient for Q = score - lambda * cost.
-            If None, uses the value from checkpoint.
+        lambda_: Legacy value-target tradeoff metadata. For current
+            single-head MTRouter checkpoints this is normally 0.0; if None,
+            uses the value saved in the checkpoint.
         use_batching: Whether to enable dynamic batching for inference.
         batch_size: Maximum batch size (when use_batching=True).
         timeout: Maximum time to wait for batch to fill in seconds.
@@ -308,7 +309,7 @@ class LearnedMode(CollectionMode):
         >>> mode = LearnedMode(
         ...     checkpoint="outputs/q_function/q_function_best.pt",
         ...     model_names=["openai/gpt-5", "deepseek/deepseek-v3.2"],
-        ...     lambda_=1.0,
+        ...     lambda_=0.0,
         ...     use_batching=True,
         ...     batch_size=8,
         ... )
@@ -330,7 +331,7 @@ class LearnedMode(CollectionMode):
         Args:
             checkpoint: Path to Q-function checkpoint file.
             model_names: Model names in training order.
-            lambda_: Cost penalty coefficient. If None, uses checkpoint value.
+            lambda_: Legacy value-target tradeoff. If None, uses checkpoint value.
             use_batching: Whether to enable dynamic batching.
             batch_size: Maximum batch size for batched inference.
             timeout: Maximum seconds to wait for batch to fill.
@@ -463,7 +464,7 @@ class LearnedMode(CollectionMode):
 class MixedMode(CollectionMode):
     """Mixed collection mode combining learned policy with roulette.
 
-    This mode implements the β-mixed strategy for Stage B data collection:
+    This mode implements a legacy beta-mixed exploration strategy:
     - With probability β: use learned policy (greedy on Q-values)
     - With probability (1-β): use uniform random (roulette)
 
@@ -507,7 +508,7 @@ class MixedMode(CollectionMode):
             use_batching: Whether to enable dynamic batching.
             batch_size: Maximum batch size for batched inference.
             timeout: Maximum seconds to wait for batch to fill.
-            lambda_: Cost penalty coefficient. If None, uses checkpoint value.
+            lambda_: Legacy value-target tradeoff. If None, uses checkpoint value.
             fallback_model_name: Model name for context window fallback.
         """
         if not 0.0 <= beta <= 1.0:

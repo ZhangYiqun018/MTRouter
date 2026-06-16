@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-结果对比脚本 - 对比 trajectories/test 目录下的不同方案结果
+Result comparison script for methods under trajectories/test.
 
-基于 summary_test_id.json 文件进行分析，包括：
-1. 整体性能对比（分数、成本、效率）
-2. 按任务分组对比
-3. 模型选择分布分析（针对路由器方案）
-4. 成本-性能前沿分析
-5. 可视化图表
+Analyzes summary_test_id.json files, including:
+1. Overall performance (score, cost, efficiency)
+2. Per-task comparisons
+3. Model-selection distribution for routing methods
+4. Cost-performance frontier
+5. Visualization charts
 """
 
 import json
@@ -61,11 +61,11 @@ def compute_ci(values: List[float], confidence: float = 0.95) -> Optional[Tuple[
     margin = t * std_err
     return (round(mean - margin, 2), round(mean + margin, 2))
 
-# 尝试导入可视化库
+# Try importing visualization libraries
 try:
     import matplotlib.pyplot as plt
     import matplotlib
-    matplotlib.use('Agg')  # 使用非交互式后端
+    matplotlib.use('Agg')  # Use non-interactive backend
     HAS_MATPLOTLIB = True
 except ImportError:
     HAS_MATPLOTLIB = False
@@ -79,18 +79,18 @@ except ImportError:
 
 @dataclass
 class MethodResult:
-    """单个方案的结果"""
+    """Result for one method."""
     name: str
     mode: str
     avg_score: float
     total_cost: float
     avg_steps: float
-    avg_steps_success: float  # 成功任务的平均步数
+    avg_steps_success: float  # Average steps for successful tasks
     total_tasks: int
-    submitted: int  # 正常提交完成的任务数
-    limits_exceeded: int  # 超限的任务数
+    submitted: int  # Number of normally submitted tasks
+    limits_exceeded: int  # Number of limit-exceeded tasks
     by_task: Dict[str, Dict[str, Any]]
-    by_run: Dict[str, Dict[str, Any]]  # 按 run 分组的统计
+    by_run: Dict[str, Dict[str, Any]]  # Statistics grouped by run
     model_usage: Dict[str, Dict[str, Any]]
     config: Dict[str, Any]
     timestamp: str
@@ -103,20 +103,20 @@ class MethodResult:
 
     @property
     def cost_per_run(self) -> float:
-        """每个 run 的成本"""
+        """Cost per run."""
         n_runs = len(self.by_run) if self.by_run else 1
         return self.total_cost / n_runs
 
     @property
     def efficiency(self) -> float:
-        """成本效率: score per dollar (基于 per-run 成本)"""
+        """Cost efficiency: score per dollar based on per-run cost."""
         if self.cost_per_run == 0:
             return float('inf')
         return self.avg_score / self.cost_per_run
 
     @property
     def completion_rate(self) -> float:
-        """正常完成率"""
+        """Normal completion rate."""
         return self.submitted / self.total_tasks if self.total_tasks > 0 else 0
 
     def format_score_with_ci(self) -> str:
@@ -127,7 +127,7 @@ class MethodResult:
 
 
 def load_summary(summary_path: Path) -> Optional[MethodResult]:
-    """加载单个 summary 文件"""
+    """Load one summary file."""
     if not summary_path.exists():
         return None
 
@@ -139,7 +139,7 @@ def load_summary(summary_path: Path) -> Optional[MethodResult]:
     by_exit = data.get('by_exit_status', {})
     by_run = data.get('by_run', {})
 
-    # 提取方案名称（从目录名）
+    # Extract method name from directory name
     name = summary_path.parent.name
 
     # Compute CI from per-run scores if multiple runs available
@@ -191,7 +191,7 @@ def load_summary(summary_path: Path) -> Optional[MethodResult]:
 
 
 def load_all_results(test_dir: Path) -> List[MethodResult]:
-    """加载所有方案的结果"""
+    """Load results for all methods."""
     results = []
 
     for method_dir in sorted(test_dir.iterdir()):
@@ -211,17 +211,17 @@ def load_all_results(test_dir: Path) -> List[MethodResult]:
 
 def format_table(headers: List[str], rows: List[List[str]],
                  alignments: Optional[List[str]] = None) -> str:
-    """格式化表格输出"""
+    """Format table output."""
     if not rows:
         return ""
 
-    # 计算每列宽度
+    # Compute column widths
     widths = [len(h) for h in headers]
     for row in rows:
         for i, cell in enumerate(row):
             widths[i] = max(widths[i], len(str(cell)))
 
-    # 默认对齐方式
+    # Default alignment
     if alignments is None:
         alignments = ['l'] + ['r'] * (len(headers) - 1)
 
@@ -234,19 +234,19 @@ def format_table(headers: List[str], rows: List[List[str]],
         else:
             return s.center(width)
 
-    # 构建表格
+    # Build table
     lines = []
 
-    # 表头
+    # Header
     header_line = ' | '.join(format_cell(h, widths[i], alignments[i])
                               for i, h in enumerate(headers))
     lines.append(header_line)
 
-    # 分隔线
+    # Separator
     sep_line = '-+-'.join('-' * w for w in widths)
     lines.append(sep_line)
 
-    # 数据行
+    # Rows
     for row in rows:
         row_line = ' | '.join(format_cell(c, widths[i], alignments[i])
                                for i, c in enumerate(row))
@@ -256,22 +256,22 @@ def format_table(headers: List[str], rows: List[List[str]],
 
 
 def print_overall_comparison(results: List[MethodResult]):
-    """打印整体对比"""
+    """Print overall comparison."""
     print("\n" + "=" * 80)
-    print("整体性能对比")
+    print("Overall Performance Comparison")
     print("=" * 80)
 
     # Check if any result has CI (multiple runs)
     has_ci = any(r.score_ci is not None for r in results)
-    score_header = '平均分数 [95% CI]' if has_ci else '平均分数'
+    score_header = 'Average Score [95% CI]' if has_ci else 'Average Score'
 
-    headers = ['方案', score_header, '成本/Run($)', '效率(score/$)', '平均步数',
-               '任务数', 'Runs', '完成率', '时间']
+    headers = ['Method', score_header, 'Cost/Run($)', 'Efficiency(score/$)', 'Avg Steps',
+               'Tasks', 'Runs', 'Completion Rate', 'Date']
 
     rows = []
     for r in sorted(results, key=lambda x: x.avg_score, reverse=True):
         rows.append([
-            r.name[:35],  # 截断长名称
+            r.name[:35],  # Truncate long names
             r.format_score_with_ci(),
             f"{r.cost_per_run:.4f}",
             f"{r.efficiency:.2f}",
@@ -284,23 +284,23 @@ def print_overall_comparison(results: List[MethodResult]):
 
     print(format_table(headers, rows))
 
-    # 效率排名
-    print("\n按成本效率排名（score per dollar）:")
+    # Efficiency ranking
+    print("\nCost-efficiency ranking (score per dollar):")
     for i, r in enumerate(sorted(results, key=lambda x: x.efficiency, reverse=True), 1):
         print(f"  {i}. {r.name}: {r.efficiency:.2f} score/$")
 
 
 def print_steps_analysis(results: List[MethodResult]):
-    """打印步数分析"""
+    """Print step analysis."""
     print("\n" + "=" * 80)
-    print("步数分析")
+    print("Step Analysis")
     print("=" * 80)
 
-    headers = ['方案', '总体平均步数', '成功任务步数', '失败任务步数', '完成率']
+    headers = ['Method', 'Overall Avg Steps', 'Successful Task Steps', 'Failed Task Steps', 'Completion Rate']
 
     rows = []
     for r in sorted(results, key=lambda x: x.avg_steps):
-        # 计算失败任务的平均步数
+        # Compute average steps for failed tasks
         if r.limits_exceeded > 0 and r.submitted > 0:
             # total_steps = avg_steps * total_tasks
             # success_steps = avg_steps_success * submitted
@@ -310,7 +310,7 @@ def print_steps_analysis(results: List[MethodResult]):
             failed_steps = total_steps - success_steps
             avg_steps_failed = failed_steps / r.limits_exceeded
         elif r.limits_exceeded > 0:
-            avg_steps_failed = r.avg_steps  # 全是失败的
+            avg_steps_failed = r.avg_steps  # All tasks failed
         else:
             avg_steps_failed = 0.0
 
@@ -324,27 +324,27 @@ def print_steps_analysis(results: List[MethodResult]):
 
     print(format_table(headers, rows))
 
-    # 步数效率分析
-    print("\n步数效率分析（成功任务完成越快越好）:")
+    # Step-efficiency analysis
+    print("\nStep-efficiency ranking (fewer steps for successful tasks is better):")
     valid_results = [r for r in results if r.submitted > 0]
     for i, r in enumerate(sorted(valid_results, key=lambda x: x.avg_steps_success), 1):
-        print(f"  {i}. {r.name}: 成功任务平均 {r.avg_steps_success:.1f} 步")
+        print(f"  {i}. {r.name}: successful tasks avg {r.avg_steps_success:.1f} steps")
 
 
 def print_task_comparison(results: List[MethodResult]):
-    """打印按任务分组的对比"""
+    """Print per-task comparison."""
     print("\n" + "=" * 80)
-    print("按任务类型对比 (平均分数)")
+    print("Per-Task Comparison (Average Score)")
     print("=" * 80)
 
-    # 收集所有任务名称
+    # Collect all task names
     all_tasks = set()
     for r in results:
         all_tasks.update(r.by_task.keys())
     all_tasks = sorted(all_tasks)
 
-    # 构建表格
-    headers = ['任务'] + [r.name[:20] for r in results]
+    # Build table
+    headers = ['Task'] + [r.name[:20] for r in results]
     rows = []
 
     for task in all_tasks:
@@ -360,11 +360,11 @@ def print_task_comparison(results: List[MethodResult]):
 
     print(format_table(headers, rows))
 
-    # 成本对比
-    print("\n按任务类型对比 (成本)")
+    # Cost comparison
+    print("\nPer-Task Comparison (Cost)")
     print("-" * 60)
 
-    headers = ['任务'] + [r.name[:20] for r in results]
+    headers = ['Task'] + [r.name[:20] for r in results]
     rows = []
 
     for task in all_tasks:
@@ -382,14 +382,14 @@ def print_task_comparison(results: List[MethodResult]):
 
 
 def print_model_usage(results: List[MethodResult]):
-    """打印模型使用情况分析"""
+    """Print model-usage analysis."""
     print("\n" + "=" * 80)
-    print("模型使用分布分析")
+    print("Model Usage Distribution Analysis")
     print("=" * 80)
 
     for r in results:
         if len(r.model_usage) <= 1:
-            continue  # 跳过单模型 baseline
+            continue  # Skip single-model baselines
 
         print(f"\n{r.name}:")
         print("-" * 40)
@@ -397,7 +397,7 @@ def print_model_usage(results: List[MethodResult]):
         total_calls = sum(m['calls'] for m in r.model_usage.values())
         total_cost = sum(m['cost'] for m in r.model_usage.values())
 
-        headers = ['模型', '调用次数', '调用占比', '成本($)', '成本占比', '单次成本']
+        headers = ['Model', 'Calls', 'Call Share', 'Cost($)', 'Cost Share', 'Cost/Call']
         rows = []
 
         for model, usage in sorted(r.model_usage.items(),
@@ -417,25 +417,25 @@ def print_model_usage(results: List[MethodResult]):
 
 
 def print_best_model_by_task(results: List[MethodResult]):
-    """分析每个任务的最佳模型"""
+    """Analyze the best method for each task."""
     print("\n" + "=" * 80)
-    print("每个任务的最佳方案")
+    print("Best Method by Task")
     print("=" * 80)
 
-    # 收集所有任务
+    # Collect all tasks
     all_tasks = set()
     for r in results:
         all_tasks.update(r.by_task.keys())
 
-    headers = ['任务', '最高分方案', '分数', '最低成本方案', '成本']
+    headers = ['Task', 'Best Score Method', 'Score', 'Lowest Cost Method', 'Cost']
     rows = []
 
     for task in sorted(all_tasks):
-        # 找最高分
+        # Find highest score
         best_score_method = None
         best_score = -float('inf')
 
-        # 找最低成本
+        # Find lowest cost
         best_cost_method = None
         best_cost = float('inf')
 
@@ -464,12 +464,12 @@ def print_best_model_by_task(results: List[MethodResult]):
 
 
 def analyze_router_improvement(results: List[MethodResult]):
-    """分析学习路由器相对于其他方案的改进"""
+    """Analyze learned-router improvement over other methods."""
     print("\n" + "=" * 80)
-    print("学习路由器相对改进分析")
+    print("Learned Router Relative Improvement Analysis")
     print("=" * 80)
 
-    # 找到学习路由器和各 baseline
+    # Find learned router and baselines
     learned_router = None
     baselines = []
     roulette = None
@@ -483,51 +483,51 @@ def analyze_router_improvement(results: List[MethodResult]):
             baselines.append(r)
 
     if not learned_router:
-        print("未找到学习路由器结果")
+        print("No learned-router result found")
         return
 
-    print(f"\n学习路由器: {learned_router.name}")
-    print(f"  - 平均分数: {learned_router.avg_score:.2f}")
-    print(f"  - 总成本: ${learned_router.total_cost:.4f}")
-    print(f"  - 效率: {learned_router.efficiency:.2f} score/$")
+    print(f"\nLearned router: {learned_router.name}")
+    print(f"  - Average score: {learned_router.avg_score:.2f}")
+    print(f"  - Total cost: ${learned_router.total_cost:.4f}")
+    print(f"  - Efficiency: {learned_router.efficiency:.2f} score/$")
 
-    # 对比各 baseline
-    print("\n与 Baseline 对比:")
+    # Compare with baselines
+    print("\nCompared with baselines:")
     for bl in baselines:
         score_diff = learned_router.avg_score - bl.avg_score
         cost_diff = learned_router.total_cost - bl.total_cost
         eff_ratio = learned_router.efficiency / bl.efficiency if bl.efficiency > 0 else float('inf')
 
         print(f"\n  vs {bl.name}:")
-        print(f"    分数差异: {score_diff:+.2f} ({score_diff/abs(bl.avg_score)*100 if bl.avg_score != 0 else 0:+.1f}%)")
-        print(f"    成本差异: ${cost_diff:+.4f} ({cost_diff/bl.total_cost*100 if bl.total_cost > 0 else 0:+.1f}%)")
-        print(f"    效率比: {eff_ratio:.2f}x")
+        print(f"    Score difference: {score_diff:+.2f} ({score_diff/abs(bl.avg_score)*100 if bl.avg_score != 0 else 0:+.1f}%)")
+        print(f"    Cost difference: ${cost_diff:+.4f} ({cost_diff/bl.total_cost*100 if bl.total_cost > 0 else 0:+.1f}%)")
+        print(f"    Efficiency ratio: {eff_ratio:.2f}x")
 
-    # 对比 roulette
+    # Compare with roulette
     if roulette:
-        print(f"\n与 Roulette 对比:")
+        print(f"\nCompared with roulette:")
         score_diff = learned_router.avg_score - roulette.avg_score
         cost_diff = learned_router.total_cost - roulette.total_cost
         eff_ratio = learned_router.efficiency / roulette.efficiency if roulette.efficiency > 0 else float('inf')
 
-        print(f"  分数差异: {score_diff:+.2f}")
-        print(f"  成本差异: ${cost_diff:+.4f}")
-        print(f"  效率比: {eff_ratio:.2f}x")
+        print(f"  Score difference: {score_diff:+.2f}")
+        print(f"  Cost difference: ${cost_diff:+.4f}")
+        print(f"  Efficiency ratio: {eff_ratio:.2f}x")
 
 
 def generate_plots(results: List[MethodResult], output_dir: Path):
-    """生成可视化图表"""
+    """Generate visualization charts."""
     if not HAS_MATPLOTLIB:
-        print("\nWarning: matplotlib 未安装，跳过图表生成")
+        print("\nWarning: matplotlib is not installed; skipping chart generation")
         return
 
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    # 1. 分数-成本散点图
+    # 1. Score-cost scatter plot
     fig, ax = plt.subplots(figsize=(10, 6))
 
     for r in results:
-        # 使用不同颜色和标记
+        # Use different colors and markers
         if 'learned' in r.name.lower():
             color, marker = 'red', '*'
             size = 200
@@ -550,9 +550,9 @@ def generate_plots(results: List[MethodResult], output_dir: Path):
     plt.tight_layout()
     plt.savefig(output_dir / 'score_vs_cost.png', dpi=150)
     plt.close()
-    print(f"已保存: {output_dir / 'score_vs_cost.png'}")
+    print(f"Saved: {output_dir / 'score_vs_cost.png'}")
 
-    # 2. 按任务分数对比柱状图
+    # 2. Per-task score comparison bar chart
     fig, ax = plt.subplots(figsize=(14, 8))
 
     all_tasks = sorted(set(t for r in results for t in r.by_task.keys()))
@@ -577,9 +577,9 @@ def generate_plots(results: List[MethodResult], output_dir: Path):
     plt.tight_layout()
     plt.savefig(output_dir / 'score_by_task.png', dpi=150)
     plt.close()
-    print(f"已保存: {output_dir / 'score_by_task.png'}")
+    print(f"Saved: {output_dir / 'score_by_task.png'}")
 
-    # 3. 模型使用分布饼图（仅路由器方案）
+    # 3. Model-usage pie charts for routing methods only
     for r in results:
         if len(r.model_usage) <= 1:
             continue
@@ -590,11 +590,11 @@ def generate_plots(results: List[MethodResult], output_dir: Path):
         calls = [r.model_usage[m]['calls'] for m in models]
         costs = [r.model_usage[m]['cost'] for m in models]
 
-        # 调用次数分布
+        # Call-count distribution
         ax1.pie(calls, labels=models, autopct='%1.1f%%', startangle=90)
         ax1.set_title('Model Usage by Calls')
 
-        # 成本分布
+        # Cost distribution
         ax2.pie(costs, labels=models, autopct='%1.1f%%', startangle=90)
         ax2.set_title('Model Usage by Cost')
 
@@ -604,17 +604,17 @@ def generate_plots(results: List[MethodResult], output_dir: Path):
         safe_name = r.name.replace('/', '_')
         plt.savefig(output_dir / f'model_dist_{safe_name}.png', dpi=150)
         plt.close()
-        print(f"已保存: {output_dir / f'model_dist_{safe_name}.png'}")
+        print(f"Saved: {output_dir / f'model_dist_{safe_name}.png'}")
 
 
 def export_to_csv(results: List[MethodResult], output_path: Path):
-    """导出结果到 CSV"""
+    """Export results to CSV."""
     import csv
 
     with open(output_path, 'w', newline='') as f:
         writer = csv.writer(f)
 
-        # 整体结果
+        # Overall results
         writer.writerow(['Overall Results'])
         writer.writerow(['Method', 'Avg Score', 'Total Cost', 'Efficiency',
                         'Avg Steps', 'Tasks', 'Completion Rate'])
@@ -624,7 +624,7 @@ def export_to_csv(results: List[MethodResult], output_path: Path):
 
         writer.writerow([])
 
-        # 按任务结果
+        # Per-task results
         writer.writerow(['By Task Results'])
         all_tasks = sorted(set(t for r in results for t in r.by_task.keys()))
         writer.writerow(['Task'] + [r.name for r in results])
@@ -636,57 +636,57 @@ def export_to_csv(results: List[MethodResult], output_path: Path):
                 row.append(score)
             writer.writerow(row)
 
-    print(f"\n已导出 CSV: {output_path}")
+    print(f"\nExported CSV: {output_path}")
 
 
 def check_runs_recommendation(results: List[MethodResult]):
-    """检查是否需要更多 runs 的建议"""
+    """Print recommendations for adding more runs."""
     print("\n" + "=" * 80)
-    print("多次 Run 建议")
+    print("Multi-Run Recommendations")
     print("=" * 80)
 
     for r in results:
         # Use actual runs from by_run data, not config
         runs = r.n_runs
         print(f"\n{r.name}:")
-        print(f"  当前 runs: {runs}")
+        print(f"  Current runs: {runs}")
 
         if runs < 3:
-            print(f"  [建议] 增加到至少 3 runs 以获得更可靠的统计")
-            print(f"         预计额外成本: ${r.cost_per_run * (3 - runs):.2f}")
+            print(f"  [Suggestion] Increase to at least 3 runs for more reliable statistics")
+            print(f"         Estimated extra cost: ${r.cost_per_run * (3 - runs):.2f}")
         else:
-            print(f"  [OK] 已有足够的 runs 数量")
+            print(f"  [OK] Enough runs are available")
 
-        # 检查模型是否有随机性
+        # Check whether the method has routing randomness
         if len(r.model_usage) > 1:
-            print(f"  [注意] 该方案使用多模型路由，随机性较大，建议增加 runs")
+            print(f"  [Note] This method uses multi-model routing and can be more stochastic; consider adding runs")
 
 
 def main():
-    parser = argparse.ArgumentParser(description='对比 trajectories/test 下的实验结果')
+    parser = argparse.ArgumentParser(description='Compare experiment results under trajectories/test')
     parser.add_argument('--test-dir', type=Path,
                        default=Path('trajectories/test'),
-                       help='测试结果目录路径')
+                       help='Path to the test result directory')
     parser.add_argument('--output-dir', type=Path,
                        default=Path('results/comparison'),
-                       help='图表输出目录')
+                       help='Chart output directory')
     parser.add_argument('--no-plots', action='store_true',
-                       help='跳过图表生成')
+                       help='Skip chart generation')
     parser.add_argument('--export-csv', type=Path,
-                       help='导出结果到 CSV 文件')
+                       help='Export results to a CSV file')
     args = parser.parse_args()
 
-    # 加载所有结果
-    print(f"从 {args.test_dir} 加载结果...")
+    # Load all results
+    print(f"Loading results from {args.test_dir}...")
     results = load_all_results(args.test_dir)
 
     if not results:
-        print("未找到任何结果文件！")
+        print("No result files found!")
         return 1
 
-    print(f"找到 {len(results)} 个方案的结果")
+    print(f"Found {len(results)} method results")
 
-    # 打印各种对比
+    # Print comparisons
     print_overall_comparison(results)
     print_steps_analysis(results)
     print_task_comparison(results)
@@ -695,11 +695,11 @@ def main():
     analyze_router_improvement(results)
     check_runs_recommendation(results)
 
-    # 生成图表
+    # Generate charts
     if not args.no_plots:
         generate_plots(results, args.output_dir)
 
-    # 导出 CSV
+    # Export CSV
     if args.export_csv:
         export_to_csv(results, args.export_csv)
 

@@ -118,7 +118,10 @@ Examples:
         type=float,
         default=1.0,
         dest="lambda_",
-        help="Cost penalty coefficient (default: 1.0)",
+        help=(
+            "Score-cost tradeoff for ridge/xgboost/cluster baselines "
+            "(single-head learned checkpoints ignore this value)"
+        ),
     )
     # Ridge/XGBoost/Cluster mode arguments
     parser.add_argument(

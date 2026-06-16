@@ -38,7 +38,7 @@ class ModelEncoderConfig:
     output_dim: int = 64  # Final output dim
 
     # Regularization
-    residual_l2_weight: float = 0.01  # L2 weight for residual embeddings
+    residual_l2_weight: float = 0.001  # L2 weight for residual embeddings
 
     # Date baseline
     knowledge_cutoff_base: str = "2026-01-01"  # Base date for cutoff calculation

@@ -168,7 +168,7 @@ class NeuralQFunction(QFunction, nn.Module):
         history_encoder: HistoryEncoder | None = None,
         model_encoder: ModelEncoder | None = None,
         q_network: QNetwork | None = None,
-        lambda_: float = 1.0,
+        lambda_: float = 0.0,
     ):
         """Initialize NeuralQFunction.
 
@@ -178,7 +178,8 @@ class NeuralQFunction(QFunction, nn.Module):
             history_encoder: Pre-built HistoryEncoder (optional).
             model_encoder: Pre-built ModelEncoder (optional).
             q_network: Pre-built QNetwork (optional).
-            lambda_: Cost penalty coefficient for Q = score - lambda * cost.
+            lambda_: Legacy value-target tradeoff metadata. The paper default is
+                0.0 because the current network predicts a single outcome value.
         """
         QFunction.__init__(self)
         nn.Module.__init__(self)
@@ -214,13 +215,14 @@ class NeuralQFunction(QFunction, nn.Module):
                 param.requires_grad = False
 
     def set_lambda(self, lambda_: float) -> None:
-        """Set the cost penalty coefficient.
+        """Set the legacy value-target tradeoff metadata.
 
-        This allows dynamic adjustment of the score-cost tradeoff
-        at inference time without retraining.
+        The current single-head MTRouter checkpoint predicts an outcome value
+        directly. This field is preserved for checkpoint compatibility and for
+        optional cost-penalized ablations.
 
         Args:
-            lambda_: New cost penalty coefficient.
+            lambda_: New legacy tradeoff coefficient.
         """
         self.lambda_ = lambda_
 
@@ -536,7 +538,7 @@ class NeuralQFunction(QFunction, nn.Module):
             # Old format: full state_dict - reject as incompatible
             raise ValueError(
                 f"Checkpoint '{path}' uses legacy format which is incompatible "
-                "with the current dual-head architecture. Please retrain the model using the "
+                "with the current single-head architecture. Please retrain the model using the "
                 "updated training script."
             )
 
@@ -574,7 +576,7 @@ class NeuralQFunction(QFunction, nn.Module):
             raise ValueError("Checkpoint does not contain model_names")
 
         # Extract lambda_
-        lambda_ = checkpoint.get("lambda_", 1.0) if isinstance(checkpoint, dict) else 1.0
+        lambda_ = checkpoint.get("lambda_", 0.0) if isinstance(checkpoint, dict) else 0.0
 
         # Extract config (with backward compatibility for old checkpoints)
         if isinstance(checkpoint, dict) and "config" in checkpoint:

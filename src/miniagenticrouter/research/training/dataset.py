@@ -33,10 +33,10 @@ class TrajectoryDataset(Dataset):
     Loads trajectory JSON files and extracts training samples with:
     - messages: Raw message list for HistoryEncoder
     - model_idx: Model index for ModelEncoder
-    - target_value: Q-learning target (final_score - lambda * remaining_cost)
+    - target_value: legacy scalar value target
     - propensity: Selection probability for importance weighting
 
-    Supports loading from multiple directories for joint training (Stage B).
+    Supports loading from multiple directories for joint offline training.
 
     Supports two modes:
     1. Online mode (default): Stores raw messages, encodes during forward pass
@@ -49,7 +49,7 @@ class TrajectoryDataset(Dataset):
         ...     model_names=["openai/gpt-5", "deepseek/deepseek-v3.2"],
         ... )
 
-        >>> # Multiple directories (Stage B joint training)
+        >>> # Multiple directories (joint offline training)
         >>> dataset = TrajectoryDataset(
         ...     trajectory_dir=[
         ...         "trajectories/roulette_propensity",
@@ -86,7 +86,9 @@ class TrajectoryDataset(Dataset):
         Args:
             trajectory_dir: Directory or list of directories containing trajectory files.
             model_names: List of model names for index mapping.
-            lambda_: Cost penalty coefficient for target calculation.
+            lambda_: Legacy coefficient used only to populate target_value.
+                The current training scripts use score_target and cost_target
+                directly and default this value to 0.0.
             max_samples: Maximum number of samples to load (for debugging).
             skip_invalid_models: Whether to skip samples with unknown model_idx.
             precompute_config: Configuration for embedding precomputation.

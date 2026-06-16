@@ -455,13 +455,13 @@ class LearnedRouter(BaseRouter):
         self.policy.reset()
 
     def set_lambda(self, lambda_: float) -> None:
-        """Set the cost penalty coefficient for Q-value computation.
+        """Forward lambda metadata to Q-functions that expose it.
 
-        This allows dynamic adjustment of the score-cost tradeoff
-        at inference time without retraining.
+        For current single-head MTRouter checkpoints, lambda is normally 0.0
+        and is kept mainly for legacy checkpoints or baseline Q-functions.
 
         Args:
-            lambda_: New cost penalty coefficient.
+            lambda_: New legacy tradeoff coefficient.
         """
         if self.q_function is not None and hasattr(self.q_function, 'set_lambda'):
             self.q_function.set_lambda(lambda_)

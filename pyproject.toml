@@ -69,6 +69,11 @@ research = [
     "transformers>=4.30.0",
     "sentence-transformers>=2.2.0",
     "scienceworld>=1.1.0",
+    "scikit-learn>=1.2.0",
+    "joblib>=1.2.0",
+    "tqdm>=4.65.0",
+    "tensorboard>=2.12.0",
+    "xgboost>=2.0.0",
 ]
 
 dev = [

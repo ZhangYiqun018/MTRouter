@@ -62,7 +62,7 @@ BENCHMARK_CONFIGS: dict[str, BenchmarkNormConfig] = {
     "hle": BenchmarkNormConfig(
         benchmark="hle",
         score_range=(0.0, 1.0),  # Binary: 0 (incorrect) or 1 (correct)
-        cost_limit=5.0,  # From hle_data_split.yaml
+        cost_limit=2.0,  # Matches the paper evaluation budget
     ),
 }
 
@@ -268,7 +268,7 @@ class TrajectoryFeature:
         - step_aec_penalty: AEC penalty for this specific step
 
         Args:
-            lambda_: Cost penalty coefficient (used for target_value only).
+            lambda_: Legacy coefficient used only for target_value compatibility.
             error_detector: Optional error detector for analyzing observations.
             aec_config: Optional AEC configuration for time-dependent penalties.
 
@@ -347,9 +347,8 @@ class TrajectoryFeature:
             # Compute adjusted score (S' = S - cumulative_aec_penalty)
             adjusted_score = normalized_score - cumulative_aec if aec_enabled else normalized_score
 
-            # Target value with lambda penalty (score is normalized, cost is raw)
-            # Note: This target_value is for backward compatibility
-            # The dual-head network uses separate score and cost targets
+            # Legacy target_value kept for older consumers. Current single-head
+            # training uses score/cost fields to build the value target.
             target = adjusted_score - lambda_ * normalized_cost
 
             samples.append(

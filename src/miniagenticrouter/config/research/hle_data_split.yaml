@@ -76,8 +76,8 @@ collection:
 
   # Agent settings
   agent:
-    step_limit: 25
-    cost_limit: 5.0  # USD per episode
+    step_limit: 30
+    cost_limit: 2.0  # USD per episode, matching the paper evaluation setting
 
 # =============================================================================
 # Evaluation Metrics

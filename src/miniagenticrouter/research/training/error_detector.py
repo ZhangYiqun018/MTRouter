@@ -106,7 +106,7 @@ class AECConfig:
     enabled: bool = True
     expected_steps: dict[str, dict[str, int]] = field(default_factory=dict)
     severity_coefficients: dict[str, float] = field(
-        default_factory=lambda: {"high": 2.0, "medium": 1.0, "low": 0.25}
+        default_factory=lambda: {"high": 1.0, "medium": 0.8, "low": 0.2}
     )
     p0: float = 0.3
     p1: float = 0.7
@@ -247,7 +247,7 @@ class ErrorDetector:
                 expected_steps=aec_data.get("expected_steps", {}),
                 severity_coefficients=aec_data.get(
                     "severity_coefficients",
-                    {"high": 2.0, "medium": 1.0, "low": 0.25},
+                    {"high": 1.0, "medium": 0.8, "low": 0.2},
                 ),
                 p0=warmup.get("p0", 0.3),
                 p1=warmup.get("p1", 0.7),

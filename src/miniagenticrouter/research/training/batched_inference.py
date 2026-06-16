@@ -264,12 +264,12 @@ class BatchedQFunction:
         self._worker_thread.join(timeout=2.0)
 
     def set_lambda(self, lambda_: float) -> None:
-        """Set the cost penalty coefficient.
+        """Set the wrapped Q-function lambda metadata.
 
         Delegates to underlying q_func.
 
         Args:
-            lambda_: New cost penalty coefficient.
+            lambda_: New legacy tradeoff coefficient.
         """
         self.q_func.set_lambda(lambda_)
 

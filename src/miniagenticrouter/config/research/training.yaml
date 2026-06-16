@@ -15,7 +15,7 @@ model_pool:
 # === History Encoder Configuration ===
 history_encoder:
   # HuggingFace model name or local path for text encoding
-  model_name: "Alibaba-NLP/gte-Qwen2-1.5B-instruct"
+  model_name: "Qwen/Qwen3-Embedding-0.6B"
 
   # Whether to freeze pretrained encoder parameters
   freeze_encoder: true
@@ -27,8 +27,7 @@ history_encoder:
   # Minimum number of recent turns to always keep
   min_recent_turns: 1
 
-  # Whether to use projection layer after encoding
-  # If true, projects from encoder_dim*2 to encoder_dim
+  # Deprecated; kept only for compatibility with older checkpoints/configs.
   use_projection: true
 
   # Pooling strategy for extracting embeddings
@@ -55,8 +54,8 @@ training:
   epochs: 100
   batch_size: 64
   learning_rate: 1.0e-3
-  lambda_: 1.0  # Cost penalty coefficient for Q = score - lambda * cost
-  cost_loss_weight: 0.0  # Weight for cost loss in dual-head training
+  lambda_: 0.0  # Paper default: train the single outcome head on terminal score/AEC target.
+  cost_loss_weight: 0.0  # Legacy dual-head option; kept at 0 for the current single-head network.
 
   # Optimizer
   optimizer: "adamw"
@@ -100,7 +99,7 @@ model_encoder:
   residual_dim: 16
 
   # L2 regularization weight for residual embeddings
-  residual_reg_weight: 0.0001
+  residual_reg_weight: 0.001
 
 # === Q-Network Configuration ===
 q_network:

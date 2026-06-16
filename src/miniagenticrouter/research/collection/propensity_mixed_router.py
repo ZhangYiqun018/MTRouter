@@ -1,4 +1,4 @@
-"""Propensity-tracking mixed router for Stage B data collection.
+"""Propensity-tracking mixed router for legacy exploration.
 
 This module provides PropensityMixedRouter, which combines a learned Q-function
 policy with uniform random selection (roulette) at a configurable mixing ratio.
@@ -49,7 +49,7 @@ class PropensityMixedRouterConfig:
 class PropensityMixedRouter(BaseRouter):
     """Mixed router that combines learned and random selection with propensity tracking.
 
-    This router implements the β-mixed strategy for Stage B data collection:
+    This router implements a legacy beta-mixed exploration strategy:
     - With probability β: select model with highest Q-value (learned policy)
     - With probability (1-β): select uniformly at random (roulette)
 

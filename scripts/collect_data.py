@@ -9,7 +9,7 @@ Usage:
     python scripts/collect_data.py --split train
 
     # Collect baseline for a single model
-    python scripts/collect_data.py --mode baseline --model-index 0
+    python scripts/collect_data.py --mode baseline --model openai/gpt-5
 
     # Override YAML config with CLI args
     python scripts/collect_data.py --runs 5 --workers 8
@@ -78,8 +78,8 @@ Examples:
   # Collect training data with roulette mode
   python scripts/collect_data.py --first-try --split train
 
-  # Collect baseline with model 0 only
-  python scripts/collect_data.py --first-try --mode baseline --model-index 0
+  # Collect baseline with one model
+  python scripts/collect_data.py --first-try --mode baseline --model openai/gpt-5
 
   # Test on a single task
   python scripts/collect_data.py --first-try --task-filter "boil" --runs 1
@@ -101,14 +101,14 @@ Examples:
         "--model-dir",
         type=Path,
         default=None,
-        help="Model directory for ridge mode (default: outputs/ridge_baseline)",
+        help="Model directory for per-model ridge/xgboost/cluster modes",
     )
     parser.add_argument(
         "--lambda",
         type=float,
         default=1.0,
         dest="lambda_",
-        help="Cost penalty coefficient for ridge mode (default: 1.0)",
+        help="Score-cost tradeoff for per-model ridge/xgboost/cluster baselines",
     )
     parser.add_argument(
         "--beta",

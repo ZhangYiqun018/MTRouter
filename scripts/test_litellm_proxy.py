@@ -5,7 +5,7 @@ from openai import OpenAI
 
 # Configuration
 BASE_URL = "http://0.0.0.0:4000/v1"
-API_KEY = "dummy"  # 如果配置了 master_key，改成对应的值
+API_KEY = "dummy"  # Replace with the configured master_key if one is set.
 
 MODELS = [
     "openai/gpt-5",
